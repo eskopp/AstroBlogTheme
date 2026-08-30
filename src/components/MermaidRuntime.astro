@@ -2,13 +2,13 @@
 ---
 
 <script>
-  const blocks = () =>
-    [...document.querySelectorAll<HTMLElement>("pre.mermaid")];
-
   const sources = new WeakMap<HTMLElement, string>();
+  let counter = 0;
 
   async function render() {
-    const nodes = blocks();
+    const nodes = [
+      ...document.querySelectorAll<HTMLElement>("pre.mermaid"),
+    ];
     if (nodes.length === 0) return;
 
     const { default: mermaid } = await import("mermaid");
@@ -23,21 +23,29 @@
       startOnLoad: false,
       securityLevel: "strict",
       theme: dark ? "dark" : "default",
-      fontFamily: "inherit",
     });
 
     for (const node of nodes) {
-      if (!sources.has(node)) sources.set(node, node.textContent ?? "");
-      node.textContent = sources.get(node)!;
-      node.removeAttribute("data-processed");
+      if (!sources.has(node)) {
+        sources.set(node, (node.textContent ?? "").trim());
+      }
+      const src = sources.get(node)!;
+      if (!src) continue;
+      try {
+        const { svg } = await mermaid.render(
+          `mermaid-${Date.now()}-${counter++}`,
+          src,
+        );
+        node.innerHTML = svg;
+        node.setAttribute("data-processed", "true");
+      } catch (err) {
+        console.error("mermaid render failed:", err);
+      }
     }
-
-    await mermaid.run({ nodes });
   }
 
   render();
 
-  // re-render when the light/dark toggle flips
   new MutationObserver(render).observe(document.documentElement, {
     attributes: true,
     attributeFilter: ["data-theme"],
