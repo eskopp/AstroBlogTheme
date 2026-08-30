@@ -156,6 +156,36 @@ pre code {
   font-size: inherit;
 }
 
+/* line numbers */
+.astro-code code {
+  counter-reset: line;
+}
+
+.astro-code .line {
+  display: block;
+  position: relative;
+  padding-left: 2.75rem;
+}
+
+.astro-code .line::before {
+  counter-increment: line;
+  content: counter(line);
+  position: absolute;
+  left: 0;
+  width: 2rem;
+  text-align: right;
+  color: var(--text-muted);
+  opacity: 0.5;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* trailing blank line Shiki sometimes emits — no number for it */
+.astro-code .line:last-child:empty::before {
+  content: none;
+  counter-increment: none;
+}
+
 /* Shiki dual theme: light inline by default, swap to the dark values in dark mode */
 :root[data-theme="dark"] .astro-code,
 :root[data-theme="dark"] .astro-code span {
@@ -822,13 +852,14 @@ th {
   background: var(--surface);
   color: var(--text-muted);
   cursor: pointer;
-  opacity: 0;
+  opacity: 0.55;
   transition: opacity 0.12s;
 }
 
 .prose pre:hover .copy-btn,
 .copy-btn:focus-visible {
   opacity: 1;
+  color: var(--text);
 }
 
 /* back to top */
