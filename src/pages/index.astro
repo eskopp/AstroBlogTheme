@@ -1,0 +1,32 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PostCard from "../components/PostCard.astro";
+import { SITE, POSTS_PER_PAGE } from "../consts";
+
+const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
+);
+const recent = posts.slice(0, POSTS_PER_PAGE);
+---
+
+<BaseLayout>
+  <section class="hero">
+    <h1>{SITE.title}</h1>
+    <p>{SITE.description}</p>
+  </section>
+
+  <section>
+    <h2 class="section-title">Latest posts</h2>
+    <ul class="post-list">
+      {recent.map((post) => <li><PostCard post={post} /></li>)}
+    </ul>
+    {
+      posts.length > recent.length && (
+        <a class="all-posts-link" href="/blog">
+          All {posts.length} posts →
+        </a>
+      )
+    }
+  </section>
+</BaseLayout>

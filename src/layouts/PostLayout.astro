@@ -1,0 +1,81 @@
+---
+import type { CollectionEntry } from "astro:content";
+import BaseLayout from "./BaseLayout.astro";
+import FormattedDate from "../components/FormattedDate.astro";
+
+interface Props {
+  post: CollectionEntry<"blog">;
+  prev?: { id: string; data: { title: string } };
+  next?: { id: string; data: { title: string } };
+}
+
+const { post, prev, next } = Astro.props;
+const { title, description, pubDate, updatedDate, heroImage, heroAlt, tags } =
+  post.data;
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  image={heroImage?.src}
+  article
+>
+  <article class="post">
+    <header class="post__header">
+      <h1>{title}</h1>
+      <p class="post__meta">
+        <FormattedDate date={pubDate} />
+        {
+          updatedDate && (
+            <span>
+              {" · updated "}
+              <FormattedDate date={updatedDate} />
+            </span>
+          )
+        }
+      </p>
+      {
+        tags.length > 0 && (
+          <ul class="tag-list">
+            {tags.map((tag) => (
+              <li>{tag}</li>
+            ))}
+          </ul>
+        )
+      }
+    </header>
+
+    {
+      heroImage && (
+        <img
+          class="post__hero"
+          src={heroImage.src}
+          width={heroImage.width}
+          height={heroImage.height}
+          alt={heroAlt}
+        />
+      )
+    }
+
+    <div class="prose">
+      <slot />
+    </div>
+
+    {
+      (prev || next) && (
+        <nav class="post__nav" aria-label="Post navigation">
+          {prev && (
+            <a href={`/blog/${prev.id}/`} rel="prev">
+              ← {prev.data.title}
+            </a>
+          )}
+          {next && (
+            <a class="is-next" href={`/blog/${next.id}/`} rel="next">
+              {next.data.title} →
+            </a>
+          )}
+        </nav>
+      )
+    }
+  </article>
+</BaseLayout>
