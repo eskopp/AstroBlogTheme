@@ -24,3 +24,6 @@ Five GitHub-style callouts, each its own colour.
 
 > [!TIP] Custom title
 > The text after the marker becomes the heading.
+
+> [!READMORE]
+> [Markdown style guide](/blog/markdown-style-guide/)

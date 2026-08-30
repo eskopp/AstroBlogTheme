@@ -9,6 +9,7 @@ const CALLOUT_LABELS = {
     important: "Wichtig",
     warning: "Warnung",
     caution: "Achtung",
+    readmore: "Weiterlesen",
   },
   en: {
     note: "Note",
@@ -16,6 +17,7 @@ const CALLOUT_LABELS = {
     important: "Important",
     warning: "Warning",
     caution: "Caution",
+    readmore: "Read more",
   },
 };
 

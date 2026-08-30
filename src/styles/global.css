@@ -337,6 +337,40 @@ blockquote {
   color: var(--callout-c, var(--accent));
 }
 
+/* "read more" / see-also box */
+.prose .callout--readmore {
+  --callout-c: var(--accent);
+  background: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.prose .callout--readmore .callout__title {
+  margin: 0;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+}
+
+.prose .callout--readmore p:last-child {
+  font-size: 1.05rem;
+  font-weight: 550;
+}
+
+.prose .callout--readmore a {
+  text-decoration: none;
+}
+
+.prose .callout--readmore a:hover {
+  text-decoration: underline;
+}
+
+.prose .callout--readmore a::after {
+  content: " →";
+  color: var(--text-muted);
+}
+
 .prose .callout > :last-child {
   margin-bottom: 0;
 }

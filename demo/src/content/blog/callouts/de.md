@@ -25,3 +25,6 @@ Fünf Callouts im GitHub-Stil, jeder in eigener Farbe.
 
 > [!TIP] Eigener Titel
 > Der Text nach der Markierung wird zur Überschrift.
+
+> [!READMORE]
+> [Markdown-Stilfibel](/blog/markdown-stilfibel/)
