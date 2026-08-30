@@ -1,4 +1,5 @@
 import sitemap from "@astrojs/sitemap";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
 
 const DEFAULTS = {
   title: "Astro Blog Theme",
@@ -74,6 +75,22 @@ export default function blogTheme(options = {}) {
       }) => {
         updateConfig({
           vite: { plugins: [virtualConfigPlugin(config)] },
+          markdown: {
+            rehypePlugins: [
+              [
+                rehypeAutolinkHeadings,
+                {
+                  behavior: "append",
+                  properties: {
+                    className: ["heading-anchor"],
+                    ariaHidden: "true",
+                    tabIndex: -1,
+                  },
+                  content: { type: "text", value: "#" },
+                },
+              ],
+            ],
+          },
         });
 
         if (

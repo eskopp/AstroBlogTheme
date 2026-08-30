@@ -50,8 +50,21 @@ const {
       <slot />
     </main>
     <Footer locale={locale} />
-    <script is:inline>
-      // Open links to other origins (external domains and subdomains) in a new tab.
+
+    <button
+      class="to-top"
+      type="button"
+      aria-label={t("backToTop", locale)}
+      data-to-top
+      hidden
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M12 19V5M5 12l7-7 7 7" />
+      </svg>
+    </button>
+
+    <script is:inline define:vars={{ copyLabel: t("copy", locale), copiedLabel: t("copied", locale) }}>
+      // 1. Open cross-origin links in a new tab.
       for (const a of document.querySelectorAll("a[href]")) {
         try {
           const u = new URL(a.getAttribute("href"), location.href);
@@ -65,6 +78,38 @@ const {
         } catch (e) {
           /* ignore unparseable hrefs */
         }
+      }
+
+      // 2. Copy button on code blocks.
+      for (const pre of document.querySelectorAll("main pre")) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "copy-btn";
+        btn.textContent = copyLabel;
+        btn.addEventListener("click", async () => {
+          try {
+            const code = pre.querySelector("code");
+            await navigator.clipboard.writeText((code || pre).innerText);
+            btn.textContent = copiedLabel;
+            setTimeout(() => (btn.textContent = copyLabel), 1500);
+          } catch (e) {
+            /* clipboard unavailable */
+          }
+        });
+        pre.appendChild(btn);
+      }
+
+      // 3. Back-to-top button.
+      const toTop = document.querySelector("[data-to-top]");
+      if (toTop) {
+        toTop.addEventListener("click", () =>
+          window.scrollTo({ top: 0, behavior: "smooth" }),
+        );
+        const onScroll = () => {
+          toTop.hidden = window.scrollY < 600;
+        };
+        addEventListener("scroll", onScroll, { passive: true });
+        onScroll();
       }
     </script>
   </body>

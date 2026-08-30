@@ -32,4 +32,10 @@ export async function getTranslations(post: Post) {
     .map((p) => ({ locale: postLocale(p.id), slug: postSlug(p) }));
 }
 
+/** Rough reading time in minutes (≈ 200 words/min), at least 1. */
+export function readingTimeMinutes(post: Post): number {
+  const words = (post.body ?? "").trim().split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(words / 200));
+}
+
 export { postLocale, postSlug };

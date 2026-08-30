@@ -2,17 +2,26 @@
 import type { CollectionEntry } from "astro:content";
 import BaseLayout from "./BaseLayout.astro";
 import FormattedDate from "../components/FormattedDate.astro";
+import Toc from "../components/Toc.astro";
 import { tagSlug } from "../tags";
-import { getTranslations } from "../posts";
+import { getTranslations, readingTimeMinutes } from "../posts";
 import { postLocale, postSlug, t } from "../i18n";
+
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
 
 interface Props {
   post: CollectionEntry<"blog">;
   prev?: CollectionEntry<"blog">;
   next?: CollectionEntry<"blog">;
+  headings?: Heading[];
 }
 
-const { post, prev, next } = Astro.props;
+const { post, prev, next, headings = [] } = Astro.props;
+const readMin = readingTimeMinutes(post);
 const { title, description, pubDate, updatedDate, heroImage, heroAlt, tags, ai } =
   post.data;
 
@@ -40,6 +49,7 @@ const alternates = [
       <h1>{title}</h1>
       <p class="post__meta">
         <FormattedDate date={pubDate} locale={locale} />
+        <span>{` · ${t("readingTime", locale, { min: readMin })}`}</span>
         {
           updatedDate && (
             <span>
@@ -83,6 +93,8 @@ const alternates = [
         />
       )
     }
+
+    <Toc headings={headings} locale={locale} />
 
     <div class="prose">
       <slot />

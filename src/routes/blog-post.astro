@@ -6,7 +6,6 @@ import { postLocale, postSlug } from "../i18n";
 
 export async function getStaticPaths() {
   const all = await getAllPosts();
-  // prev / next stay within the same language
   const byLocale = new Map<string, typeof all>();
   for (const post of all) {
     const loc = postLocale(post.id);
@@ -27,9 +26,9 @@ export async function getStaticPaths() {
 }
 
 const { post, prev, next } = Astro.props;
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
 ---
 
-<PostLayout post={post} prev={prev} next={next}>
+<PostLayout post={post} prev={prev} next={next} headings={headings}>
   <Content />
 </PostLayout>
