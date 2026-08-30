@@ -86,6 +86,14 @@ export default function blogTheme(options = {}) {
             pattern: "/404",
             entrypoint: "astro-blog-theme/routes/404.astro",
           });
+          injectRoute({
+            pattern: "/tags",
+            entrypoint: "astro-blog-theme/routes/tags-index.astro",
+          });
+          injectRoute({
+            pattern: "/tags/[tag]",
+            entrypoint: "astro-blog-theme/routes/tag.astro",
+          });
           if (config.search) {
             injectRoute({
               pattern: "/search.json",

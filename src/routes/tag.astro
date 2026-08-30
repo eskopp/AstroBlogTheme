@@ -1,0 +1,36 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PostCard from "../components/PostCard.astro";
+import { tagSlug } from "../tags";
+
+export async function getStaticPaths() {
+  const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
+    (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
+  );
+
+  const groups = new Map<string, { name: string; posts: typeof posts }>();
+  for (const post of posts) {
+    for (const name of post.data.tags) {
+      const slug = tagSlug(name);
+      if (!groups.has(slug)) groups.set(slug, { name, posts: [] });
+      groups.get(slug)!.posts.push(post);
+    }
+  }
+
+  return [...groups.entries()].map(([slug, group]) => ({
+    params: { tag: slug },
+    props: { tagName: group.name, posts: group.posts },
+  }));
+}
+
+const { tagName, posts } = Astro.props;
+---
+
+<BaseLayout title={`#${tagName}`} description={`Posts tagged “${tagName}”.`}>
+  <p class="tag-page__back"><a href="/tags">← All tags</a></p>
+  <h1>#{tagName}</h1>
+  <ul class="post-list">
+    {posts.map((post) => <li><PostCard post={post} /></li>)}
+  </ul>
+</BaseLayout>

@@ -2,30 +2,23 @@
 ---
 
 <div class="search" data-search>
-  <button
-    type="button"
-    class="search__toggle"
-    aria-label="Search"
-    aria-expanded="false"
-    aria-controls="search-panel"
-    data-search-toggle
-  >
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+  <div class="search__field">
+    <svg class="search__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
       <circle cx="11" cy="11" r="7"></circle>
       <path d="M21 21l-4.3-4.3"></path>
     </svg>
-  </button>
-
-  <div class="search__panel" id="search-panel" hidden data-search-panel>
     <input
       type="search"
       class="search__input"
-      placeholder="Search posts…"
+      placeholder="Search…"
       aria-label="Search posts"
       autocomplete="off"
       spellcheck="false"
       data-search-input
     />
+  </div>
+
+  <div class="search__panel" hidden data-search-panel>
     <ul class="search__results" data-search-results></ul>
     <p class="search__empty" hidden data-search-empty>No matching posts.</p>
   </div>
@@ -34,9 +27,8 @@
 <script>
   const root = document.querySelector("[data-search]");
   if (root) {
-    const toggle = root.querySelector<HTMLButtonElement>("[data-search-toggle]")!;
-    const panel = root.querySelector<HTMLElement>("[data-search-panel]")!;
     const input = root.querySelector<HTMLInputElement>("[data-search-input]")!;
+    const panel = root.querySelector<HTMLElement>("[data-search-panel]")!;
     const list = root.querySelector<HTMLElement>("[data-search-results]")!;
     const empty = root.querySelector<HTMLElement>("[data-search-empty]")!;
 
@@ -81,6 +73,7 @@
       const q = input.value.trim().toLowerCase();
       list.innerHTML = "";
       if (!q || !entries) {
+        panel.hidden = true;
         empty.hidden = true;
         return;
       }
@@ -90,12 +83,14 @@
         .sort((a, b) => b.s - a.s || +new Date(b.e.date) - +new Date(a.e.date))
         .slice(0, 8);
 
+      panel.hidden = false;
       empty.hidden = hits.length > 0;
       for (const { e } of hits) {
         const li = document.createElement("li");
         const a = document.createElement("a");
         a.href = e.url;
-        a.innerHTML = `<span class="search__result-title"></span><span class="search__result-desc"></span>`;
+        a.innerHTML =
+          '<span class="search__result-title"></span><span class="search__result-desc"></span>';
         a.querySelector(".search__result-title")!.textContent = e.title;
         a.querySelector(".search__result-desc")!.textContent = e.description;
         li.appendChild(a);
@@ -103,35 +98,36 @@
       }
     };
 
-    const open = () => {
-      panel.hidden = false;
-      toggle.setAttribute("aria-expanded", "true");
-      void load().then(render);
-      input.focus();
-    };
-    const close = () => {
+    const closePanel = () => {
       panel.hidden = true;
-      toggle.setAttribute("aria-expanded", "false");
-      input.value = "";
-      list.innerHTML = "";
-      empty.hidden = true;
     };
 
-    toggle.addEventListener("click", () =>
-      panel.hidden ? open() : close(),
-    );
+    input.addEventListener("focus", () => {
+      load().then(render);
+    });
     input.addEventListener("input", () => {
       load().then(render);
     });
-    document.addEventListener("keydown", (ev) => {
-      if (ev.key === "Escape" && !panel.hidden) close();
-      if (ev.key === "/" && panel.hidden && document.activeElement === document.body) {
-        ev.preventDefault();
-        open();
+    input.addEventListener("keydown", (ev) => {
+      if (ev.key === "Escape") {
+        input.value = "";
+        closePanel();
+        input.blur();
       }
     });
     document.addEventListener("click", (ev) => {
-      if (!panel.hidden && !root.contains(ev.target as Node)) close();
+      if (!root.contains(ev.target as Node)) closePanel();
+    });
+    document.addEventListener("keydown", (ev) => {
+      if (
+        ev.key === "/" &&
+        document.activeElement !== input &&
+        !(document.activeElement instanceof HTMLInputElement) &&
+        !(document.activeElement instanceof HTMLTextAreaElement)
+      ) {
+        ev.preventDefault();
+        input.focus();
+      }
     });
   }
 </script>
