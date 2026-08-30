@@ -7,13 +7,13 @@ function remarkMermaidPassthrough() {
   return (tree) => {
     visit(tree, "code", (node, index, parent) => {
       if (node.lang !== "mermaid" || !parent || index === undefined) return;
+      // only < and & need escaping inside <pre> text; leaving --> intact
       const escaped = node.value
         .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
+        .replace(/</g, "&lt;");
       parent.children[index] = {
         type: "html",
-        value: `<pre class="mermaid">${escaped}</pre>`,
+        value: `<pre class="mermaid">\n${escaped}\n</pre>`,
       };
     });
   };
