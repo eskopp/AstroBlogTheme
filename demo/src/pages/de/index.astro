@@ -1,0 +1,17 @@
+---
+import config from "virtual:astro-blog-theme/config";
+import BaseLayout from "astro-blog-theme/layouts/BaseLayout.astro";
+import PostCard from "astro-blog-theme/components/PostCard.astro";
+import { getPosts } from "astro-blog-theme/posts";
+import { t } from "astro-blog-theme/i18n";
+const posts = await getPosts("de");
+const recent = posts.slice(0, config.postsPerPage);
+const alternates = [{ locale: "en", href: "/" }, { locale: "de", href: "/de/" }];
+---
+<BaseLayout locale="de" alternates={alternates}>
+  <section class="hero"><h1>{config.title}</h1><p>{config.description}</p></section>
+  <section>
+    <h2 class="section-title">{t("latestPosts", "de")}</h2>
+    <ul class="post-list">{recent.map((post) => <li><PostCard post={post} /></li>)}</ul>
+  </section>
+</BaseLayout>

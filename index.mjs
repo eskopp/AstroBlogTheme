@@ -8,6 +8,7 @@ const DEFAULTS = {
   locales: ["en"],
   localeMeta: { en: "en_US", de: "de_DE" },
   localeLabels: { en: "EN", de: "DE" },
+  localeHome: {},
   ui: {},
   nav: [
     { href: "/", label: "Home" },
@@ -31,6 +32,7 @@ function resolveConfig(options) {
     locales: options.locales ?? DEFAULTS.locales,
     localeMeta: { ...DEFAULTS.localeMeta, ...(options.localeMeta ?? {}) },
     localeLabels: { ...DEFAULTS.localeLabels, ...(options.localeLabels ?? {}) },
+    localeHome: { ...DEFAULTS.localeHome, ...(options.localeHome ?? {}) },
     ui: options.ui ?? {},
   };
   merged.defaultLocale = merged.locales[0];

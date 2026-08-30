@@ -25,6 +25,8 @@ export interface BlogThemeOptions {
   localeMeta?: Record<string, string>;
   /** Language-switcher labels, e.g. `{ de: "DE", en: "EN" }`. */
   localeLabels?: Record<string, string>;
+  /** Home path per locale, used by the switcher on pages without a translation. Default `/` for the default locale, `/<locale>/` otherwise. */
+  localeHome?: Record<string, string>;
   /** Override built-in UI strings per locale: `{ de: { latestPosts: "…" } }`. */
   ui?: Record<string, Record<string, string>>;
   /** Primary navigation links. */

@@ -17,7 +17,7 @@ const isActive = (href: string) =>
     ? pathname === "/"
     : pathname === href || pathname.startsWith(`${href}/`);
 
-const showSwitcher = config.locales.length > 1 && alternates.length > 0;
+const showSwitcher = config.locales.length > 1;
 ---
 
 <header class="site-header">
