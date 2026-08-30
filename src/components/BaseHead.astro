@@ -1,5 +1,5 @@
 ---
-import { SITE } from "../consts";
+import config from "virtual:astro-blog-theme/config";
 
 interface Props {
   title?: string;
@@ -10,14 +10,15 @@ interface Props {
 
 const {
   title,
-  description = SITE.description,
+  description = config.description,
   image = "/og-default.svg",
   article = false,
 } = Astro.props;
 
-const pageTitle = title ? `${title} · ${SITE.title}` : SITE.title;
-const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url);
-const socialImage = new URL(image, Astro.site ?? Astro.url);
+const base = Astro.site ?? Astro.url;
+const pageTitle = title ? `${title} · ${config.title}` : config.title;
+const canonical = new URL(Astro.url.pathname, base);
+const socialImage = new URL(image, base);
 ---
 
 <meta charset="utf-8" />
@@ -28,22 +29,22 @@ const socialImage = new URL(image, Astro.site ?? Astro.url);
 <link
   rel="alternate"
   type="application/rss+xml"
-  title={SITE.title}
-  href={new URL("rss.xml", Astro.site ?? Astro.url)}
+  title={config.title}
+  href={new URL("rss.xml", base)}
 />
 
 <title>{pageTitle}</title>
 <meta name="description" content={description} />
-<meta name="author" content={SITE.author} />
+{config.author && <meta name="author" content={config.author} />}
 <meta name="generator" content={Astro.generator} />
 
 <meta property="og:type" content={article ? "article" : "website"} />
-<meta property="og:site_name" content={SITE.title} />
+<meta property="og:site_name" content={config.title} />
 <meta property="og:title" content={pageTitle} />
 <meta property="og:description" content={description} />
 <meta property="og:url" content={canonical} />
 <meta property="og:image" content={socialImage} />
-<meta property="og:locale" content={SITE.locale} />
+<meta property="og:locale" content={config.locale} />
 
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content={pageTitle} />
@@ -59,11 +60,10 @@ const socialImage = new URL(image, Astro.site ?? Astro.url);
       return null;
     }
   })();
-  const theme =
+  root.dataset.theme =
     stored === "light" || stored === "dark"
       ? stored
       : window.matchMedia("(prefers-color-scheme: dark)").matches
         ? "dark"
         : "light";
-  root.dataset.theme = theme;
 </script>

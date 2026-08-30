@@ -1,56 +1,148 @@
 # AstroBlogTheme
 
-A clean, minimal, content-first blog theme built with [Astro](https://astro.build).
+A reusable Astro blog theme, packaged as an **Astro integration** and imported
+straight from GitHub, the way a Hugo theme is pulled in as a module. Your blog
+project stays tiny: a config, a content-collection definition, and your posts.
 
-- Markdown content collection (`src/content/blog/`)
+- Injected routes: `/blog`, `/blog/[...slug]`, `/rss.xml`, `/404`
 - Light / dark mode with a no-flash toggle
-- RSS feed (`/rss.xml`) and sitemap (`@astrojs/sitemap`)
+- `@astrojs/sitemap` wired up automatically
 - Open Graph and Twitter Card metadata
-- No client JavaScript except the theme toggle
-- TypeScript strict, zero UI framework
+- No client JavaScript beyond the theme toggle
+- No build step in the package — Astro consumes the `.astro` sources directly
 
-## Getting started
+## Install from GitHub
+
+```sh
+npm install github:eskopp/AstroBlogTheme
+```
+
+Or pin a tag or commit in `package.json`:
+
+```json
+{
+  "dependencies": {
+    "astro-blog-theme": "github:eskopp/AstroBlogTheme#v0.1.0"
+  }
+}
+```
+
+## Wire it up
+
+**`astro.config.mjs`**
+
+```js
+import { defineConfig } from "astro/config";
+import blogTheme from "astro-blog-theme";
+
+export default defineConfig({
+  site: "https://your-domain.example",
+  integrations: [
+    blogTheme({
+      title: "My Blog",
+      description: "Notes and longer pieces.",
+      author: "Your Name",
+      nav: [
+        { href: "/", label: "Home" },
+        { href: "/blog", label: "Blog" },
+      ],
+      social: [{ href: "/rss.xml", label: "RSS" }],
+    }),
+  ],
+});
+```
+
+**`src/content.config.ts`** — declare a `blog` collection with the theme's schema:
+
+```ts
+import { defineCollection } from "astro:content";
+import { glob } from "astro/loaders";
+import { blogSchema } from "astro-blog-theme/content";
+
+const blog = defineCollection({
+  loader: glob({ base: "./src/content/blog", pattern: "**/*.{md,mdx}" }),
+  schema: blogSchema,
+});
+
+export const collections = { blog };
+```
+
+**`src/env.d.ts`** — so the editor knows the virtual config module:
+
+```ts
+/// <reference types="astro-blog-theme/virtual.d.ts" />
+```
+
+**`src/pages/index.astro`** — you own the home page. Example:
+
+```astro
+---
+import { getCollection } from "astro:content";
+import config from "virtual:astro-blog-theme/config";
+import BaseLayout from "astro-blog-theme/layouts/BaseLayout.astro";
+import PostCard from "astro-blog-theme/components/PostCard.astro";
+
+const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
+);
+---
+
+<BaseLayout>
+  <ul class="post-list">
+    {posts.map((post) => <li><PostCard post={post} /></li>)}
+  </ul>
+</BaseLayout>
+```
+
+Add posts to `src/content/blog/*.md`. Put `favicon.svg` (and optionally
+`og-default.svg`) in `public/`.
+
+## Options
+
+| Option         | Type                            | Default                            |
+| -------------- | ------------------------------- | ---------------------------------- |
+| `title`        | `string`                        | `"Astro Blog Theme"`               |
+| `description`  | `string`                        | `"A blog built with Astro."`       |
+| `author`       | `string`                        | `""`                               |
+| `lang`         | `string`                        | `"en"`                             |
+| `locale`       | `string`                        | `"en_US"`                          |
+| `nav`          | `{ href, label }[]`             | Home + Blog                        |
+| `social`       | `{ href, label }[]`             | RSS                                |
+| `postsPerPage` | `number`                        | `5`                                |
+| `injectRoutes` | `boolean`                       | `true`                             |
+| `sitemap`      | `boolean`                       | `true`                             |
+
+## Package exports
+
+| Import                                      | What                              |
+| ------------------------------------------- | --------------------------------- |
+| `astro-blog-theme`                          | the integration (default export)  |
+| `astro-blog-theme/content`                  | `blogSchema`                      |
+| `astro-blog-theme/layouts/BaseLayout.astro` | page shell (head, header, footer) |
+| `astro-blog-theme/layouts/PostLayout.astro` | single-post layout                |
+| `astro-blog-theme/components/*.astro`       | `Header`, `Footer`, `PostCard`, … |
+| `astro-blog-theme/styles.css`               | the stylesheet (already loaded by the layouts) |
+| `virtual:astro-blog-theme/config`           | the resolved options object       |
+
+## Overriding styles
+
+The theme is a single stylesheet of CSS custom properties. Override the tokens
+after the theme loads:
+
+```css
+:root {
+  --accent: #c0392b;
+  --content-width: 48rem;
+}
+```
+
+## Local development
 
 ```sh
 npm install
-npm run dev      # http://localhost:4321
-npm run build    # static output in ./dist
-npm run preview
+cd demo && npm install
+npm run dev      # runs the demo app against ../ (the package source)
 ```
-
-## Configuration
-
-| What | Where |
-| ---- | ----- |
-| Site title, description, nav, social links | `src/consts.ts` |
-| Canonical site URL (`site:`) | `src/consts.ts` → `SITE.url` |
-| Colors, fonts, spacing | `src/styles/global.css` (`:root` tokens) |
-| Layouts | `src/layouts/` |
-| Components | `src/components/` |
-
-## Writing posts
-
-Add `.md` or `.mdx` files to `src/content/blog/`. Frontmatter:
-
-```yaml
----
-title: "Post title" # required
-description: "One line for previews and meta tags" # required
-pubDate: 2026-08-30 # required
-updatedDate: 2026-09-01 # optional
-heroImage: ./cover.jpg # optional, relative to the post file
-heroAlt: "Alt text for the hero image" # optional
-tags: ["astro", "notes"] # optional
-draft: false # optional, hides the post when true
----
-```
-
-The post URL is `/blog/<filename-without-extension>/`.
-
-## Deployment
-
-`npm run build` produces a fully static site in `dist/`. Set `SITE.url` to the
-real domain first so canonical URLs, the sitemap and the RSS feed are correct.
 
 ## License
 

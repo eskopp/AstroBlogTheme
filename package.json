@@ -1,23 +1,40 @@
 {
   "name": "astro-blog-theme",
-  "type": "module",
   "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "astro dev",
-    "start": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro",
-    "check": "astro check"
+  "type": "module",
+  "description": "A reusable Astro blog theme, importable straight from GitHub like a Hugo module.",
+  "author": "Erik Skopp",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eskopp/AstroBlogTheme.git"
+  },
+  "keywords": ["astro", "astro-integration", "astro-theme", "blog", "theme"],
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.mjs"
+    },
+    "./content": "./src/content.ts",
+    "./styles.css": "./src/styles/global.css",
+    "./components/*": "./src/components/*",
+    "./layouts/*": "./src/layouts/*",
+    "./routes/*": "./src/routes/*",
+    "./virtual.d.ts": "./src/virtual.d.ts",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.mjs",
+    "index.d.ts",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "peerDependencies": {
+    "astro": "^5.0.0"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.11",
-    "@astrojs/sitemap": "^3.4.1",
-    "astro": "^5.13.0"
-  },
-  "devDependencies": {
-    "@astrojs/check": "^0.9.4",
-    "typescript": "^5.7.0"
+    "@astrojs/sitemap": "^3.4.1"
   }
 }
