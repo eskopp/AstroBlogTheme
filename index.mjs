@@ -80,6 +80,10 @@ export default function blogTheme(options = {}) {
         updateConfig({
           vite: { plugins: [virtualConfigPlugin(config)] },
           markdown: {
+            shikiConfig: {
+              themes: { light: "github-light", dark: "github-dark" },
+              wrap: true,
+            },
             rehypePlugins: [
               [
                 rehypeAutolinkHeadings,
