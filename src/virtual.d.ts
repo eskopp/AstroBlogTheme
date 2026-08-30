@@ -23,6 +23,7 @@ declare module "virtual:astro-blog-theme/config" {
     search: boolean;
     toc: boolean;
     mermaid: boolean;
+    math: boolean;
   }
   const config: ThemeConfig;
   export default config;

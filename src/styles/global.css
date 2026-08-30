@@ -156,6 +156,17 @@ pre code {
   font-size: inherit;
 }
 
+/* katex math */
+.prose .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.25rem 0;
+}
+
+.prose .katex {
+  font-size: 1.05em;
+}
+
 /* mermaid diagrams */
 .prose pre.mermaid {
   border: none;

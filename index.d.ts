@@ -47,6 +47,8 @@ export interface BlogThemeOptions {
   toc?: boolean;
   /** Render ```mermaid code blocks as diagrams client-side. Requires `mermaid` installed in the consumer. Default `false`. */
   mermaid?: boolean;
+  /** Render $...$ / $$...$$ math (and \ce{} chemistry) at build time with KaTeX. Requires remark-math, rehype-katex, katex in the consumer. Default `false`. */
+  math?: boolean;
   /** Inject `/blog`, `/blog/[...slug]`, `/rss.xml` and `/404`. Default `true`. */
   injectRoutes?: boolean;
   /** Add `@astrojs/sitemap` unless already present. Default `true`. */

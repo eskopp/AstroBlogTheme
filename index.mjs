@@ -41,6 +41,7 @@ const DEFAULTS = {
   search: true,
   toc: true,
   mermaid: false,
+  math: false,
 };
 
 function resolveConfig(options) {
@@ -59,6 +60,7 @@ function resolveConfig(options) {
     ui: options.ui ?? {},
     toc: options.toc ?? DEFAULTS.toc,
     mermaid: options.mermaid ?? DEFAULTS.mermaid,
+    math: options.math ?? DEFAULTS.math,
   };
   merged.defaultLocale = merged.locales[0];
   return merged;
@@ -91,12 +93,29 @@ export default function blogTheme(options = {}) {
   return {
     name: "astro-blog-theme",
     hooks: {
-      "astro:config:setup": ({
+      "astro:config:setup": async ({
         config: astroConfig,
         injectRoute,
         updateConfig,
         logger,
       }) => {
+        const remarkPlugins = [];
+        const mathRehype = [];
+        if (config.mermaid) remarkPlugins.push(remarkMermaidPassthrough);
+        if (config.math) {
+          try {
+            await import("katex/contrib/mhchem"); // registers \ce{} for chemistry
+            const remarkMath = (await import("remark-math")).default;
+            const rehypeKatex = (await import("rehype-katex")).default;
+            remarkPlugins.push(remarkMath);
+            mathRehype.push([rehypeKatex, { throwOnError: false }]);
+          } catch (e) {
+            logger.warn(
+              "math: true but remark-math / rehype-katex / katex are not installed. Run `npm i remark-math rehype-katex katex`.",
+            );
+          }
+        }
+
         updateConfig({
           vite: { plugins: [virtualConfigPlugin(config)] },
           markdown: {
@@ -104,8 +123,9 @@ export default function blogTheme(options = {}) {
               themes: { light: "github-light", dark: "github-dark" },
               wrap: true,
             },
-            remarkPlugins: config.mermaid ? [remarkMermaidPassthrough] : [],
+            remarkPlugins,
             rehypePlugins: [
+              ...mathRehype,
               [
                 rehypeAutolinkHeadings,
                 {

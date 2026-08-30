@@ -1,6 +1,6 @@
 {
   "name": "astro-blog-theme",
-  "version": "0.2.20",
+  "version": "0.2.21",
   "type": "module",
   "description": "A reusable Astro blog theme, importable straight from GitHub like a Hugo module.",
   "author": "Erik Skopp",
@@ -43,6 +43,9 @@
     "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
-    "mermaid": "^11.0.0"
+    "katex": "^0.16.11",
+    "mermaid": "^11.0.0",
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0"
   }
 }
