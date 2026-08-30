@@ -1,5 +1,23 @@
 import sitemap from "@astrojs/sitemap";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
+import { visit } from "unist-util-visit";
+
+/** Turn ```mermaid fenced blocks into <pre class="mermaid"> for client rendering. */
+function remarkMermaidPassthrough() {
+  return (tree) => {
+    visit(tree, "code", (node, index, parent) => {
+      if (node.lang !== "mermaid" || !parent || index === undefined) return;
+      const escaped = node.value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+      parent.children[index] = {
+        type: "html",
+        value: `<pre class="mermaid">${escaped}</pre>`,
+      };
+    });
+  };
+}
 
 const DEFAULTS = {
   title: "Astro Blog Theme",
@@ -22,6 +40,7 @@ const DEFAULTS = {
   postsPerPage: 5,
   search: true,
   toc: true,
+  mermaid: false,
 };
 
 function resolveConfig(options) {
@@ -39,6 +58,7 @@ function resolveConfig(options) {
     errorLocale: options.errorLocale ?? DEFAULTS.errorLocale,
     ui: options.ui ?? {},
     toc: options.toc ?? DEFAULTS.toc,
+    mermaid: options.mermaid ?? DEFAULTS.mermaid,
   };
   merged.defaultLocale = merged.locales[0];
   return merged;
@@ -84,6 +104,7 @@ export default function blogTheme(options = {}) {
               themes: { light: "github-light", dark: "github-dark" },
               wrap: true,
             },
+            remarkPlugins: config.mermaid ? [remarkMermaidPassthrough] : [],
             rehypePlugins: [
               [
                 rehypeAutolinkHeadings,

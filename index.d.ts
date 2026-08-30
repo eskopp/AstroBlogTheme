@@ -45,6 +45,8 @@ export interface BlogThemeOptions {
   search?: boolean;
   /** Show the table of contents on posts. Per-post `toc` frontmatter overrides. Default `true`. */
   toc?: boolean;
+  /** Render ```mermaid code blocks as diagrams client-side. Requires `mermaid` installed in the consumer. Default `false`. */
+  mermaid?: boolean;
   /** Inject `/blog`, `/blog/[...slug]`, `/rss.xml` and `/404`. Default `true`. */
   injectRoutes?: boolean;
   /** Add `@astrojs/sitemap` unless already present. Default `true`. */

@@ -156,6 +156,29 @@ pre code {
   font-size: inherit;
 }
 
+/* mermaid diagrams */
+.prose pre.mermaid {
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 1.75rem 0;
+  text-align: center;
+  font-family: inherit;
+  /* hide the raw source until mermaid swaps in the SVG */
+  color: transparent;
+  min-height: 2rem;
+}
+
+.prose pre.mermaid[data-processed] {
+  color: inherit;
+}
+
+.prose pre.mermaid svg {
+  max-width: 100%;
+  height: auto;
+  display: inline-block;
+}
+
 /* line numbers */
 .astro-code code {
   counter-reset: line;

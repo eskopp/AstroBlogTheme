@@ -22,6 +22,7 @@ declare module "virtual:astro-blog-theme/config" {
     postsPerPage: number;
     search: boolean;
     toc: boolean;
+    mermaid: boolean;
   }
   const config: ThemeConfig;
   export default config;

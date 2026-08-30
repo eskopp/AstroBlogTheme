@@ -1,0 +1,45 @@
+---
+---
+
+<script>
+  const blocks = () =>
+    [...document.querySelectorAll<HTMLElement>("pre.mermaid")];
+
+  const sources = new WeakMap<HTMLElement, string>();
+
+  async function render() {
+    const nodes = blocks();
+    if (nodes.length === 0) return;
+
+    const { default: mermaid } = await import("mermaid");
+
+    const root = document.documentElement;
+    const dark =
+      root.dataset.theme === "dark" ||
+      (!root.dataset.theme &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: "strict",
+      theme: dark ? "dark" : "default",
+      fontFamily: "inherit",
+    });
+
+    for (const node of nodes) {
+      if (!sources.has(node)) sources.set(node, node.textContent ?? "");
+      node.textContent = sources.get(node)!;
+      node.removeAttribute("data-processed");
+    }
+
+    await mermaid.run({ nodes });
+  }
+
+  render();
+
+  // re-render when the light/dark toggle flips
+  new MutationObserver(render).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-theme"],
+  });
+</script>

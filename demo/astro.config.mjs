@@ -18,6 +18,7 @@ export default defineConfig({
         { href: "/impressum", label: "Impressum" },
         { href: "/datenschutz", label: "Datenschutz" },
       ],
+      mermaid: true,
       license: { label: "CC BY-ND 4.0", href: "https://creativecommons.org/licenses/by-nd/4.0/deed.de" },
       social: [
         { href: "https://github.com/eskopp/AstroBlogTheme", label: "GitHub" },
