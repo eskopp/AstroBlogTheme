@@ -28,4 +28,6 @@ export const blogSchema = ({ image }: SchemaContext) =>
     heroAlt: z.string().default(""),
     tags: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
+    /** Whether AI was used while writing this post. */
+    ai: z.boolean().default(false),
   });

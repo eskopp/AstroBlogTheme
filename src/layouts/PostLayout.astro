@@ -11,7 +11,7 @@ interface Props {
 }
 
 const { post, prev, next } = Astro.props;
-const { title, description, pubDate, updatedDate, heroImage, heroAlt, tags } =
+const { title, description, pubDate, updatedDate, heroImage, heroAlt, tags, ai } =
   post.data;
 ---
 
@@ -31,6 +31,16 @@ const { title, description, pubDate, updatedDate, heroImage, heroAlt, tags } =
             <span>
               {" · updated "}
               <FormattedDate date={updatedDate} />
+            </span>
+          )
+        }
+        {
+          ai && (
+            <span class="ai-flag" title="AI was used while writing this post">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" />
+              </svg>
+              AI
             </span>
           )
         }
