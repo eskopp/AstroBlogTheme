@@ -194,13 +194,18 @@ pre code {
   margin: 1.75rem 0;
   text-align: center;
   font-family: inherit;
-  /* hide the raw source until mermaid swaps in the SVG */
+}
+
+/* hide the raw source until mermaid swaps in the SVG */
+.prose pre.mermaid:not([data-processed]) {
   color: transparent;
+  font-size: 0;
   min-height: 2rem;
 }
 
 .prose pre.mermaid[data-processed] {
   color: inherit;
+  white-space: normal;
 }
 
 .prose pre.mermaid svg {
@@ -270,6 +275,74 @@ blockquote {
   border-left: 3px solid var(--accent);
   color: var(--text-muted);
   font-style: italic;
+}
+
+/* callouts (GitHub-style alerts) */
+:root {
+  --callout-note: #3b82f6;
+  --callout-tip: #16a34a;
+  --callout-important: #a855f7;
+  --callout-warning: #d97706;
+  --callout-caution: #ef4444;
+}
+
+:root:not([data-theme="light"]) {
+  --callout-note: #60a5fa;
+  --callout-tip: #4ade80;
+  --callout-important: #c084fc;
+  --callout-warning: #fbbf24;
+  --callout-caution: #f87171;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --callout-note: #60a5fa;
+    --callout-tip: #4ade80;
+    --callout-important: #c084fc;
+    --callout-warning: #fbbf24;
+    --callout-caution: #f87171;
+  }
+}
+
+.prose .callout {
+  margin: 1.5rem 0;
+  padding: 0.9rem 1.15rem;
+  border-left: 3px solid var(--callout-c, var(--accent));
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background: color-mix(in srgb, var(--callout-c, var(--accent)) 8%, transparent);
+  font-style: normal;
+}
+
+.prose .callout--note {
+  --callout-c: var(--callout-note);
+}
+.prose .callout--tip {
+  --callout-c: var(--callout-tip);
+}
+.prose .callout--important {
+  --callout-c: var(--callout-important);
+}
+.prose .callout--warning {
+  --callout-c: var(--callout-warning);
+}
+.prose .callout--caution {
+  --callout-c: var(--callout-caution);
+}
+
+.prose .callout__title {
+  margin: 0 0 0.4rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+  color: var(--callout-c, var(--accent));
+}
+
+.prose .callout > :last-child {
+  margin-bottom: 0;
+}
+
+.prose .callout > * + * {
+  margin-top: 0.6rem;
 }
 
 hr {

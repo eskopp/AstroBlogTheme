@@ -2,6 +2,64 @@ import sitemap from "@astrojs/sitemap";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import { visit } from "unist-util-visit";
 
+const CALLOUT_LABELS = {
+  de: {
+    note: "Hinweis",
+    tip: "Tipp",
+    important: "Wichtig",
+    warning: "Warnung",
+    caution: "Achtung",
+  },
+  en: {
+    note: "Note",
+    tip: "Tip",
+    important: "Important",
+    warning: "Warning",
+    caution: "Caution",
+  },
+};
+
+/** GitHub-style callouts: a blockquote starting with `[!TYPE]` becomes <aside class="callout callout--type">. */
+function remarkCallouts(config) {
+  return (tree, file) => {
+    const seg = (file.path || "").split("/").pop() || "";
+    const loc = seg.replace(/\.(md|mdx)$/, "");
+    const locale = config.locales.includes(loc) ? loc : config.defaultLocale;
+    const labels = { ...(CALLOUT_LABELS.en), ...(CALLOUT_LABELS[locale] || {}) };
+
+    visit(tree, "blockquote", (node) => {
+      const first = node.children[0];
+      if (!first || first.type !== "paragraph" || !first.children.length) return;
+      const lead = first.children[0];
+      if (!lead || lead.type !== "text") return;
+      const m = lead.value.match(/^\[!(\w+)\]([ \t]+.*)?(\r?\n|$)/);
+      if (!m) return;
+      const type = m[1].toLowerCase();
+      if (!labels[type]) return;
+
+      const customTitle = (m[2] || "").trim();
+      // strip the marker line from the first paragraph
+      lead.value = lead.value.slice(m[0].length);
+      if (!lead.value) first.children.shift();
+      if (!first.children.length) node.children.shift();
+
+      const uiTitle = config.ui?.[locale]?.[`callout_${type}`];
+      node.data = node.data || {};
+      node.data.hName = "aside";
+      node.data.hProperties = {
+        className: ["callout", `callout--${type}`],
+      };
+      node.children.unshift({
+        type: "paragraph",
+        data: { hProperties: { className: ["callout__title"] } },
+        children: [
+          { type: "text", value: customTitle || uiTitle || labels[type] },
+        ],
+      });
+    });
+  };
+}
+
 /** Turn ```mermaid fenced blocks into <pre class="mermaid"> for client rendering. */
 function remarkMermaidPassthrough() {
   return (tree) => {
@@ -101,7 +159,7 @@ export default function blogTheme(options = {}) {
         updateConfig,
         logger,
       }) => {
-        const remarkPlugins = [];
+        const remarkPlugins = [[remarkCallouts, config]];
         const mathRehype = [];
         if (config.mermaid) remarkPlugins.push(remarkMermaidPassthrough);
         if (config.math) {

@@ -93,7 +93,7 @@ const {
       }
 
       // 2. Copy button on code blocks.
-      for (const pre of document.querySelectorAll("main pre")) {
+      for (const pre of document.querySelectorAll("main pre:not(.mermaid)")) {
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "copy-btn";
