@@ -99,6 +99,7 @@ export default function blogTheme(options = {}) {
             injectRoute({ pattern: `${p}/blog`, entrypoint: at("blog-index.astro") });
             injectRoute({ pattern: `${p}/tags`, entrypoint: at("tags-index.astro") });
             injectRoute({ pattern: `${p}/rss.xml`, entrypoint: at("rss.xml.ts") });
+            injectRoute({ pattern: `${p}/llms.txt`, entrypoint: at("llms.txt.ts") });
             if (config.search) {
               injectRoute({
                 pattern: `${p}/search.json`,
