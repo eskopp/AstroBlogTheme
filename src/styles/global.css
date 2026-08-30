@@ -159,10 +159,15 @@ pre code {
 /* line numbers */
 .astro-code code {
   counter-reset: line;
+  /* collapse the literal newlines between the .line spans so display:block
+     lines don't render double-spaced */
+  white-space: normal;
 }
 
 .astro-code .line {
   display: block;
+  white-space: pre-wrap;
+  min-height: 1.6em;
   position: relative;
   padding-left: 2.75rem;
 }
@@ -181,9 +186,8 @@ pre code {
 }
 
 /* trailing blank line Shiki sometimes emits — no number for it */
-.astro-code .line:last-child:empty::before {
-  content: none;
-  counter-increment: none;
+.astro-code .line:last-child:empty {
+  display: none;
 }
 
 /* Shiki dual theme: light inline by default, swap to the dark values in dark mode */
