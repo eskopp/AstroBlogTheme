@@ -305,6 +305,33 @@ th {
   display: block;
 }
 
+/* language switcher */
+
+.lang-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+}
+
+.lang-switch a {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.lang-switch a:hover {
+  color: var(--text);
+}
+
+.lang-switch__current {
+  color: var(--text);
+  font-weight: 550;
+}
+
+.lang-switch__sep {
+  color: var(--border-strong);
+}
+
 /* search */
 
 .search {

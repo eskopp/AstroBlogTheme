@@ -8,6 +8,7 @@ export default defineConfig({
       title: "Demo Blog",
       description: "Demo app for astro-blog-theme.",
       author: "Erik Skopp",
+      locales: ["en", "de"],
       nav: [
         { href: "/", label: "Home" },
         { href: "/blog", label: "Blog" },

@@ -1,32 +1,5 @@
 ---
-import { getCollection } from "astro:content";
-import config from "virtual:astro-blog-theme/config";
-import BaseLayout from "astro-blog-theme/layouts/BaseLayout.astro";
-import PostCard from "astro-blog-theme/components/PostCard.astro";
-
-const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
-  (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
-);
-const recent = posts.slice(0, config.postsPerPage);
+import HomePage from "../components/HomePage.astro";
 ---
 
-<BaseLayout>
-  <section class="hero">
-    <h1>{config.title}</h1>
-    <p>{config.description}</p>
-  </section>
-
-  <section>
-    <h2 class="section-title">Latest posts</h2>
-    <ul class="post-list">
-      {recent.map((post) => <li><PostCard post={post} /></li>)}
-    </ul>
-    {
-      posts.length > recent.length && (
-        <a class="all-posts-link" href="/blog">
-          All {posts.length} posts →
-        </a>
-      )
-    }
-  </section>
-</BaseLayout>
+<HomePage locale="en" />

@@ -3,16 +3,28 @@ import type { CollectionEntry } from "astro:content";
 import BaseLayout from "./BaseLayout.astro";
 import FormattedDate from "../components/FormattedDate.astro";
 import { tagSlug } from "../tags";
+import { getTranslations } from "../posts";
+import { postLocale, postSlug, localeHref, t } from "../i18n";
 
 interface Props {
   post: CollectionEntry<"blog">;
-  prev?: { id: string; data: { title: string } };
-  next?: { id: string; data: { title: string } };
+  prev?: CollectionEntry<"blog">;
+  next?: CollectionEntry<"blog">;
 }
 
 const { post, prev, next } = Astro.props;
 const { title, description, pubDate, updatedDate, heroImage, heroAlt, tags, ai } =
   post.data;
+
+const locale = postLocale(post.id);
+const translations = await getTranslations(post);
+const alternates = [
+  { locale, href: localeHref(locale, `/blog/${postSlug(post.id)}/`) },
+  ...translations.map((tr) => ({
+    locale: tr.locale,
+    href: localeHref(tr.locale, `/blog/${tr.slug}/`),
+  })),
+];
 ---
 
 <BaseLayout
@@ -20,23 +32,25 @@ const { title, description, pubDate, updatedDate, heroImage, heroAlt, tags, ai }
   description={description}
   image={heroImage?.src}
   article
+  locale={locale}
+  alternates={alternates}
 >
   <article class="post">
     <header class="post__header">
       <h1>{title}</h1>
       <p class="post__meta">
-        <FormattedDate date={pubDate} />
+        <FormattedDate date={pubDate} locale={locale} />
         {
           updatedDate && (
             <span>
-              {" · updated "}
-              <FormattedDate date={updatedDate} />
+              {` · ${t("updated", locale)} `}
+              <FormattedDate date={updatedDate} locale={locale} />
             </span>
           )
         }
         {
           ai && (
-            <span class="ai-flag" title="AI was used while writing this post">
+            <span class="ai-flag" title={t("aiFlag", locale)}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" />
               </svg>
@@ -50,7 +64,7 @@ const { title, description, pubDate, updatedDate, heroImage, heroAlt, tags, ai }
           <ul class="tag-list">
             {tags.map((tag) => (
               <li>
-                <a href={`/tags/${tagSlug(tag)}/`}>#{tag}</a>
+                <a href={localeHref(locale, `/tags/${tagSlug(tag)}/`)}>#{tag}</a>
               </li>
             ))}
           </ul>
@@ -76,14 +90,18 @@ const { title, description, pubDate, updatedDate, heroImage, heroAlt, tags, ai }
 
     {
       (prev || next) && (
-        <nav class="post__nav" aria-label="Post navigation">
+        <nav class="post__nav" aria-label={t("postNav", locale)}>
           {prev && (
-            <a href={`/blog/${prev.id}/`} rel="prev">
+            <a href={localeHref(locale, `/blog/${postSlug(prev.id)}/`)} rel="prev">
               ← {prev.data.title}
             </a>
           )}
           {next && (
-            <a class="is-next" href={`/blog/${next.id}/`} rel="next">
+            <a
+              class="is-next"
+              href={localeHref(locale, `/blog/${postSlug(next.id)}/`)}
+              rel="next"
+            >
               {next.data.title} →
             </a>
           )}

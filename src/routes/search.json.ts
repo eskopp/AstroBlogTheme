@@ -1,4 +1,6 @@
-import { getCollection } from "astro:content";
+import type { APIContext } from "astro";
+import { getPosts } from "../posts";
+import { localeFromPath, localeHref, postSlug } from "../i18n";
 
 function plain(markdown: string | undefined): string {
   if (!markdown) return "";
@@ -13,17 +15,16 @@ function plain(markdown: string | undefined): string {
     .slice(0, 2000);
 }
 
-export async function GET() {
-  const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
-    (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
-  );
+export async function GET(context: APIContext) {
+  const locale = localeFromPath(context.url.pathname);
+  const posts = await getPosts(locale);
 
   const index = posts.map((post) => ({
     title: post.data.title,
     description: post.data.description,
     tags: post.data.tags,
     date: post.data.pubDate.toISOString(),
-    url: `/blog/${post.id}/`,
+    url: localeHref(locale, `/blog/${postSlug(post.id)}/`),
     body: plain(post.body),
   }));
 

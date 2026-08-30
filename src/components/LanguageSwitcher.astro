@@ -1,0 +1,33 @@
+---
+import config from "virtual:astro-blog-theme/config";
+import { defaultLocale, localeHref, type Locale } from "../i18n";
+
+interface Props {
+  locale: Locale;
+  alternates?: { locale: Locale; href: string }[];
+}
+const { locale, alternates = [] } = Astro.props;
+
+const hrefFor = (target: Locale): string => {
+  if (target === locale) return "";
+  const alt = alternates.find((a) => a.locale === target);
+  return alt ? alt.href : localeHref(target, "/");
+};
+---
+
+<div class="lang-switch" role="group" aria-label="Language">
+  {
+    config.locales.map((loc: Locale, i: number) => (
+      <>
+        {i > 0 && <span class="lang-switch__sep" aria-hidden="true">/</span>}
+        {loc === locale ? (
+          <span class="lang-switch__current" aria-current="true">
+            {config.localeLabels?.[loc] ?? loc.toUpperCase()}
+          </span>
+        ) : (
+          <a href={hrefFor(loc)}>{config.localeLabels?.[loc] ?? loc.toUpperCase()}</a>
+        )}
+      </>
+    ))
+  }
+</div>

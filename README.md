@@ -110,6 +110,32 @@ Add posts to `src/content/blog/*.md`. Put `favicon.svg` (and optionally
 | `injectRoutes` | `boolean`                       | `true`                             |
 | `sitemap`      | `boolean`                       | `true`                             |
 
+## Multi-language
+
+Set `locales` (first entry is the default, served without a URL prefix):
+
+```js
+blogTheme({ locales: ["de", "en"] })
+```
+
+The integration wires up Astro's `i18n` config automatically. Layout: **one
+folder per post, one file per language named after the locale**:
+
+```
+src/content/blog/
+  autohaus/
+    de.md
+    en.md
+```
+
+The folder path is the slug and links the translations; set `translationKey`
+in the frontmatter only to override that. Injected routes gain `/<locale>/…`
+variants (`/en/blog`, `/en/rss.xml`, …). `hreflang` alternates, per-locale RSS
+and a header language switcher come for free. UI strings ship for `de` and `en`
+and can be overridden per locale via the `ui` option. Your own pages
+(`src/pages/index.astro`) get a `/<locale>/` sibling and pass `locale` to
+`BaseLayout`.
+
 ## Package exports
 
 | Import                                      | What                              |

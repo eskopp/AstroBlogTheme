@@ -7,8 +7,12 @@ declare module "virtual:astro-blog-theme/config" {
     title: string;
     description: string;
     author: string;
-    lang: string;
     locale: string;
+    locales: string[];
+    defaultLocale: string;
+    localeMeta: Record<string, string>;
+    localeLabels: Record<string, string>;
+    ui: Record<string, Record<string, string>>;
     nav: ThemeNavLink[];
     social: ThemeNavLink[];
     postsPerPage: number;

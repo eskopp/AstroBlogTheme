@@ -1,4 +1,5 @@
-import { getCollection } from "astro:content";
+import { getPosts } from "./posts";
+import { defaultLocale, type Locale } from "./i18n";
 
 /** Hugo-style urlize: lowercase, spaces to hyphens, strip other punctuation. */
 export function tagSlug(tag: string): string {
@@ -19,9 +20,11 @@ export interface TagEntry {
   count: number;
 }
 
-/** All tags used by published posts, most-used first, then alphabetical. */
-export async function getTags(): Promise<TagEntry[]> {
-  const posts = await getCollection("blog", ({ data }) => !data.draft);
+/** Tags used by published posts in one locale, most-used first. */
+export async function getTags(
+  locale: Locale = defaultLocale,
+): Promise<TagEntry[]> {
+  const posts = await getPosts(locale);
   const map = new Map<string, TagEntry>();
   for (const post of posts) {
     for (const name of post.data.tags) {

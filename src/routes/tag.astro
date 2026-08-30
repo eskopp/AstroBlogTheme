@@ -1,14 +1,12 @@
 ---
-import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PostCard from "../components/PostCard.astro";
+import { getPosts } from "../posts";
 import { tagSlug } from "../tags";
+import { defaultLocale, localeHref, t } from "../i18n";
 
 export async function getStaticPaths() {
-  const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
-    (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
-  );
-
+  const posts = await getPosts(defaultLocale);
   const groups = new Map<string, { name: string; posts: typeof posts }>();
   for (const post of posts) {
     for (const name of post.data.tags) {
@@ -17,18 +15,24 @@ export async function getStaticPaths() {
       groups.get(slug)!.posts.push(post);
     }
   }
-
-  return [...groups.entries()].map(([slug, group]) => ({
+  return [...groups.entries()].map(([slug, g]) => ({
     params: { tag: slug },
-    props: { tagName: group.name, posts: group.posts },
+    props: { tagName: g.name, posts: g.posts },
   }));
 }
 
 const { tagName, posts } = Astro.props;
+const locale = defaultLocale;
 ---
 
-<BaseLayout title={`#${tagName}`} description={`Posts tagged “${tagName}”.`}>
-  <p class="tag-page__back"><a href="/tags">← All tags</a></p>
+<BaseLayout
+  locale={locale}
+  title={`#${tagName}`}
+  description={t("postsTagged", locale, { tag: tagName })}
+>
+  <p class="tag-page__back">
+    <a href={localeHref(locale, "/tags")}>← {t("allTags", locale)}</a>
+  </p>
   <h1>#{tagName}</h1>
   <ul class="post-list">
     {posts.map((post) => <li><PostCard post={post} /></li>)}

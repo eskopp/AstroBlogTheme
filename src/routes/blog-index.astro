@@ -1,11 +1,11 @@
 ---
-import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PostCard from "../components/PostCard.astro";
+import { getPosts } from "../posts";
+import { localeFromPath, t } from "../i18n";
 
-const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
-  (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
-);
+const locale = localeFromPath(Astro.url.pathname);
+const posts = await getPosts(locale);
 
 const groups = new Map<number, typeof posts>();
 for (const post of posts) {
@@ -16,8 +16,8 @@ for (const post of posts) {
 const years = [...groups.keys()].sort((a, b) => b - a);
 ---
 
-<BaseLayout title="Blog" description="All posts.">
-  <h1>Blog</h1>
+<BaseLayout locale={locale} title={t("blog", locale)}>
+  <h1>{t("blog", locale)}</h1>
   {
     years.map((year) => (
       <section style="margin-top: 2.5rem;">
@@ -32,5 +32,5 @@ const years = [...groups.keys()].sort((a, b) => b - a);
       </section>
     ))
   }
-  {posts.length === 0 && <p>No posts yet.</p>}
+  {posts.length === 0 && <p>{t("noPosts", locale)}</p>}
 </BaseLayout>

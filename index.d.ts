@@ -12,10 +12,21 @@ export interface BlogThemeOptions {
   description?: string;
   /** Author name for metadata and the footer. */
   author?: string;
-  /** `<html lang>` value. Default `"en"`. */
-  lang?: string;
-  /** Open Graph locale, e.g. `"en_US"`. */
+  /** Open Graph locale fallback, e.g. `"en_US"`. */
   locale?: string;
+  /**
+   * Content locales. The first is the default and is served without a URL
+   * prefix; the others live under `/<locale>/…`. One folder per post holds one
+   * file per language, named after the locale (`blog/autohaus/de.md`,
+   * `blog/autohaus/en.md`). Default `["en"]` (single language).
+   */
+  locales?: string[];
+  /** Open Graph locale per content locale, e.g. `{ de: "de_DE", en: "en_US" }`. */
+  localeMeta?: Record<string, string>;
+  /** Language-switcher labels, e.g. `{ de: "DE", en: "EN" }`. */
+  localeLabels?: Record<string, string>;
+  /** Override built-in UI strings per locale: `{ de: { latestPosts: "…" } }`. */
+  ui?: Record<string, Record<string, string>>;
   /** Primary navigation links. */
   nav?: NavLink[];
   /** Footer / social links. */

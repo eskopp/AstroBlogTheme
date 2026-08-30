@@ -30,4 +30,10 @@ export const blogSchema = ({ image }: SchemaContext) =>
     draft: z.boolean().default(false),
     /** Whether AI was used while writing this post. */
     ai: z.boolean().default(false),
+    /**
+     * Links this post to its translations. Defaults to the post's folder path,
+     * so `blog/autohaus/de.md` and `blog/autohaus/en.md` are linked
+     * automatically. Set it only to override that.
+     */
+    translationKey: z.string().optional(),
   });
