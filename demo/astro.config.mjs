@@ -14,6 +14,10 @@ export default defineConfig({
         { href: "/blog", label: "Blog" },
         { href: "/about", label: "About" },
       ],
+      legal: [
+        { href: "/impressum", label: "Impressum" },
+        { href: "/datenschutz", label: "Datenschutz" },
+      ],
       social: [
         { href: "https://github.com/eskopp/AstroBlogTheme", label: "GitHub" },
         { href: "/rss.xml", label: "RSS" },

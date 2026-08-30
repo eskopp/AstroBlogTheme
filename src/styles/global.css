@@ -463,6 +463,13 @@ th {
   justify-content: space-between;
 }
 
+.site-footer__legal {
+  padding-top: 0;
+  padding-bottom: 1.75rem;
+  font-size: 0.85rem;
+  justify-content: flex-start;
+}
+
 .site-footer a {
   color: var(--text-muted);
 }

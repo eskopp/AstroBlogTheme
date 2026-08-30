@@ -15,6 +15,7 @@ declare module "virtual:astro-blog-theme/config" {
     ui: Record<string, Record<string, string>>;
     nav: ThemeNavLink[];
     social: ThemeNavLink[];
+    legal: ThemeNavLink[];
     postsPerPage: number;
     search: boolean;
   }

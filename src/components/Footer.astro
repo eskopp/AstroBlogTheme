@@ -1,6 +1,7 @@
 ---
 import config from "virtual:astro-blog-theme/config";
 const year = new Date().getFullYear();
+const legal = config.legal ?? [];
 ---
 
 <footer class="site-footer">
@@ -17,4 +18,18 @@ const year = new Date().getFullYear();
       }
     </nav>
   </div>
+  {
+    legal.length > 0 && (
+      <div class="site-footer__inner site-footer__legal">
+        <nav aria-label="Legal">
+          {legal.map((link, i) => (
+            <>
+              {i > 0 && <span aria-hidden="true"> · </span>}
+              <a href={link.href}>{link.label}</a>
+            </>
+          ))}
+        </nav>
+      </div>
+    )
+  }
 </footer>
