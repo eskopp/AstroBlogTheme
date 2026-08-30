@@ -14,6 +14,8 @@ interface Props {
   locale?: Locale;
   /** `{ locale, href }` for this page in other languages. */
   alternates?: { locale: Locale; href: string }[];
+  /** Emit `<meta name="robots" content="noindex">`. */
+  noindex?: boolean;
 }
 
 const {
@@ -24,6 +26,7 @@ const {
   wide = false,
   locale = defaultLocale,
   alternates = [],
+  noindex = false,
 } = Astro.props;
 ---
 
@@ -37,6 +40,7 @@ const {
       article={article}
       locale={locale}
       alternates={alternates}
+      noindex={noindex}
     />
   </head>
   <body>

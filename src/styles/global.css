@@ -731,16 +731,35 @@ th {
   text-align: right;
 }
 
-/* 404 */
+/* error pages */
 
-.notfound {
+.errorpage {
   text-align: center;
-  padding: 4rem 0;
+  padding: 4rem 0 5rem;
 }
 
-.notfound p {
+.errorpage__code {
+  font-size: clamp(3.5rem, 2rem + 8vw, 6rem);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--text-muted);
+  opacity: 0.5;
+}
+
+.errorpage h1 {
+  margin-top: 0.75rem;
+}
+
+.errorpage__body {
   color: var(--text-muted);
   margin-top: 0.75rem;
+  max-width: 34ch;
+  margin-inline: auto;
+}
+
+.errorpage p:last-child {
+  margin-top: 1.5rem;
 }
 
 /* tablet */

@@ -1,0 +1,21 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { defaultLocale, t } from "../i18n";
+
+interface Props {
+  code: number;
+  titleKey: string;
+  bodyKey: string;
+}
+const { code, titleKey, bodyKey } = Astro.props;
+const locale = defaultLocale;
+---
+
+<BaseLayout locale={locale} title={t(titleKey, locale)} noindex>
+  <div class="errorpage">
+    <p class="errorpage__code">{code}</p>
+    <h1>{t(titleKey, locale)}</h1>
+    <p class="errorpage__body">{t(bodyKey, locale)}</p>
+    <p><a href="/">{t("backHome", locale)}</a></p>
+  </div>
+</BaseLayout>

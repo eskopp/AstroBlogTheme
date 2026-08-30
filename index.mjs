@@ -94,7 +94,13 @@ export default function blogTheme(options = {}) {
               entrypoint: at("search.json.ts"),
             });
           }
-          injectRoute({ pattern: "/404", entrypoint: at("404.astro") });
+          // 404 + 500 emit flat .html; 403/503/429 emit <code>/index.html
+          for (const code of [404, 403, 500, 503, 429]) {
+            injectRoute({
+              pattern: `/${code}`,
+              entrypoint: at(`${code}.astro`),
+            });
+          }
         }
 
         if (!astroConfig.site) {

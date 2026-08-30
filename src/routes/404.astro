@@ -1,14 +1,5 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import { defaultLocale, t } from "../i18n";
-
-const locale = defaultLocale;
+import ErrorPage from "../components/ErrorPage.astro";
 ---
 
-<BaseLayout locale={locale} title={t("notFound", locale)}>
-  <div class="notfound">
-    <h1>404</h1>
-    <p>{t("notFoundBody", locale)}</p>
-    <p><a href="/">{t("backHome", locale)}</a></p>
-  </div>
-</BaseLayout>
+<ErrorPage code={404} titleKey="notFound" bodyKey="notFoundBody" />

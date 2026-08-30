@@ -9,6 +9,7 @@ interface Props {
   article?: boolean;
   locale?: Locale;
   alternates?: { locale: Locale; href: string }[];
+  noindex?: boolean;
 }
 
 const {
@@ -18,6 +19,7 @@ const {
   article = false,
   locale = defaultLocale,
   alternates = [],
+  noindex = false,
 } = Astro.props;
 
 const base = Astro.site ?? Astro.url;
@@ -51,6 +53,7 @@ const ogLocale = config.localeMeta?.[locale] ?? config.locale;
 
 <title>{pageTitle}</title>
 <meta name="description" content={description} />
+{noindex && <meta name="robots" content="noindex, nofollow" />}
 {config.author && <meta name="author" content={config.author} />}
 <meta name="generator" content={Astro.generator} />
 
