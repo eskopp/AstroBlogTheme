@@ -3,8 +3,9 @@ import type { CollectionEntry } from "astro:content";
 import BaseLayout from "./BaseLayout.astro";
 import FormattedDate from "../components/FormattedDate.astro";
 import Toc from "../components/Toc.astro";
+import PostCard from "../components/PostCard.astro";
 import { tagSlug } from "../tags";
-import { getTranslations, readingTimeMinutes } from "../posts";
+import { getTranslations, getRelated, readingTimeMinutes } from "../posts";
 import { postLocale, postSlug, t } from "../i18n";
 
 interface Heading {
@@ -27,6 +28,7 @@ const { title, description, pubDate, updatedDate, heroImage, heroAlt, tags, ai }
 
 const locale = postLocale(post.id);
 const translations = await getTranslations(post);
+const related = await getRelated(post);
 const alternates = [
   { locale, href: `/blog/${postSlug(post)}/` },
   ...translations.map((tr) => ({
@@ -34,13 +36,18 @@ const alternates = [
     href: `/blog/${tr.slug}/`,
   })),
 ];
+const articleMeta = {
+  published: pubDate.toISOString(),
+  modified: updatedDate?.toISOString(),
+};
 ---
 
 <BaseLayout
   title={title}
   description={description}
-  image={heroImage?.src}
+  image={heroImage?.src ?? `/og/${postSlug(post)}.svg`}
   article
+  articleMeta={articleMeta}
   locale={locale}
   alternates={alternates}
 >
@@ -114,6 +121,21 @@ const alternates = [
             </a>
           )}
         </nav>
+      )
+    }
+
+    {
+      related.length > 0 && (
+        <section class="related">
+          <h2 class="section-title">{t("relatedPosts", locale)}</h2>
+          <ul class="post-list">
+            {related.map((p) => (
+              <li>
+                <PostCard post={p} />
+              </li>
+            ))}
+          </ul>
+        </section>
       )
     }
   </article>

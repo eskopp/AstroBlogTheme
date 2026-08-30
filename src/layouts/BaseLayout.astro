@@ -16,6 +16,8 @@ interface Props {
   alternates?: { locale: Locale; href: string }[];
   /** Emit `<meta name="robots" content="noindex">`. */
   noindex?: boolean;
+  /** Article dates for BlogPosting structured data. */
+  articleMeta?: { published: string; modified?: string };
 }
 
 const {
@@ -27,6 +29,7 @@ const {
   locale = defaultLocale,
   alternates = [],
   noindex = false,
+  articleMeta,
 } = Astro.props;
 ---
 
@@ -41,6 +44,7 @@ const {
       locale={locale}
       alternates={alternates}
       noindex={noindex}
+      articleMeta={articleMeta}
     />
   </head>
   <body>

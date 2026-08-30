@@ -10,6 +10,8 @@ interface Props {
   locale?: Locale;
   alternates?: { locale: Locale; href: string }[];
   noindex?: boolean;
+  /** Set on article pages for BlogPosting structured data. */
+  articleMeta?: { published: string; modified?: string };
 }
 
 const {
@@ -20,6 +22,7 @@ const {
   locale = defaultLocale,
   alternates = [],
   noindex = false,
+  articleMeta,
 } = Astro.props;
 
 const base = Astro.site ?? Astro.url;
@@ -27,6 +30,32 @@ const pageTitle = title ? `${title} · ${config.title}` : config.title;
 const canonical = new URL(Astro.url.pathname, base);
 const socialImage = new URL(image, base);
 const ogLocale = config.localeMeta?.[locale] ?? config.locale;
+
+const jsonLd: Record<string, unknown>[] = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: config.title,
+    url: new URL("/", base).href,
+    description: config.description,
+  },
+];
+if (article && articleMeta) {
+  jsonLd.push({
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: title ?? config.title,
+    description,
+    url: canonical.href,
+    image: socialImage.href,
+    datePublished: articleMeta.published,
+    dateModified: articleMeta.modified ?? articleMeta.published,
+    inLanguage: locale,
+    ...(config.author
+      ? { author: { "@type": "Person", name: config.author } }
+      : {}),
+  });
+}
 ---
 
 <meta charset="utf-8" />
@@ -39,6 +68,12 @@ const ogLocale = config.localeMeta?.[locale] ?? config.locale;
   type="application/rss+xml"
   title={config.title}
   href={new URL("/rss.xml", base)}
+/>
+<link
+  rel="alternate"
+  type="application/feed+json"
+  title={config.title}
+  href={new URL("/feed.json", base)}
 />
 {
   alternates.map((alt) => (
@@ -69,6 +104,8 @@ const ogLocale = config.localeMeta?.[locale] ?? config.locale;
 <meta name="twitter:title" content={pageTitle} />
 <meta name="twitter:description" content={description} />
 <meta name="twitter:image" content={socialImage} />
+
+{jsonLd.map((entry) => <script type="application/ld+json" set:html={JSON.stringify(entry)} />)}
 
 <script is:inline>
   const root = document.documentElement;

@@ -27,6 +27,8 @@ export interface BlogThemeOptions {
   localeLabels?: Record<string, string>;
   /** Home path per locale, used by the switcher on pages without a translation. Default `/` for the default locale, `/<locale>/` otherwise. */
   localeHome?: Record<string, string>;
+  /** Language for the error pages (404, 403, …). Default: the default locale. */
+  errorLocale?: string;
   /** Override built-in UI strings per locale: `{ de: { latestPosts: "…" } }`. */
   ui?: Record<string, Record<string, string>>;
   /** Primary navigation links. */

@@ -13,6 +13,7 @@ declare module "virtual:astro-blog-theme/config" {
     localeMeta: Record<string, string>;
     localeLabels: Record<string, string>;
     localeHome: Record<string, string>;
+    errorLocale: string | null;
     ui: Record<string, Record<string, string>>;
     nav: ThemeNavLink[];
     social: ThemeNavLink[];

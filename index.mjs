@@ -10,6 +10,7 @@ const DEFAULTS = {
   localeMeta: { en: "en_US", de: "de_DE" },
   localeLabels: { en: "EN", de: "DE" },
   localeHome: {},
+  errorLocale: null,
   ui: {},
   nav: [
     { href: "/", label: "Home" },
@@ -34,6 +35,7 @@ function resolveConfig(options) {
     localeMeta: { ...DEFAULTS.localeMeta, ...(options.localeMeta ?? {}) },
     localeLabels: { ...DEFAULTS.localeLabels, ...(options.localeLabels ?? {}) },
     localeHome: { ...DEFAULTS.localeHome, ...(options.localeHome ?? {}) },
+    errorLocale: options.errorLocale ?? DEFAULTS.errorLocale,
     ui: options.ui ?? {},
   };
   merged.defaultLocale = merged.locales[0];
@@ -110,7 +112,12 @@ export default function blogTheme(options = {}) {
           injectRoute({ pattern: "/tags", entrypoint: at("tags-index.astro") });
           injectRoute({ pattern: "/tags/[tag]", entrypoint: at("tag.astro") });
           injectRoute({ pattern: "/rss.xml", entrypoint: at("rss.xml.ts") });
+          injectRoute({ pattern: "/feed.json", entrypoint: at("feed.json.ts") });
           injectRoute({ pattern: "/llms.txt", entrypoint: at("llms.txt.ts") });
+          injectRoute({
+            pattern: "/og/[slug].svg",
+            entrypoint: at("og/[slug].svg.ts"),
+          });
           if (config.search) {
             injectRoute({
               pattern: "/search.json",

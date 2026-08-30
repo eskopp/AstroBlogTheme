@@ -3,7 +3,7 @@ title: "Markdown style guide"
 description: "A reference post to check styling after changing the design tokens."
 pubDate: 2026-08-24
 updatedDate: 2026-08-28
-tags: ["reference"]
+tags: ["reference", "meta"]
 ---
 
 Use this post to check that headings, code, quotes and lists look right.

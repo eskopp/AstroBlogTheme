@@ -3,7 +3,7 @@ title: "Markdown-Stilfibel"
 description: "Ein Referenzbeitrag zum Prüfen des Stylings nach Änderungen an den Design-Tokens."
 pubDate: 2026-08-24
 updatedDate: 2026-08-28
-tags: ["referenz"]
+tags: ["referenz", "meta"]
 urlSlug: "markdown-stilfibel"
 ---
 

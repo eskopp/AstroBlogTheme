@@ -1,4 +1,5 @@
 ---
+import config from "virtual:astro-blog-theme/config";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { defaultLocale, t } from "../i18n";
 
@@ -8,7 +9,7 @@ interface Props {
   bodyKey: string;
 }
 const { code, titleKey, bodyKey } = Astro.props;
-const locale = defaultLocale;
+const locale = config.errorLocale ?? defaultLocale;
 ---
 
 <BaseLayout locale={locale} title={t(titleKey, locale)} noindex>
