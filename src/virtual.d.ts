@@ -21,6 +21,7 @@ declare module "virtual:astro-blog-theme/config" {
     license: { label: string; href: string } | null;
     postsPerPage: number;
     search: boolean;
+    toc: boolean;
   }
   const config: ThemeConfig;
   export default config;

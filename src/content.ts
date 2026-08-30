@@ -30,6 +30,8 @@ export const blogSchema = ({ image }: SchemaContext) =>
     draft: z.boolean().default(false),
     /** Whether AI was used while writing this post. */
     ai: z.boolean().default(false),
+    /** Show the table of contents for this post. Overrides the theme's `toc` option. */
+    toc: z.boolean().optional(),
     /**
      * URL slug for this post. Defaults to the folder name. Carries the language.
      * Not called `slug` on purpose — Astro's glob loader would treat that as the

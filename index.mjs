@@ -21,6 +21,7 @@ const DEFAULTS = {
   license: null,
   postsPerPage: 5,
   search: true,
+  toc: true,
 };
 
 function resolveConfig(options) {
@@ -37,6 +38,7 @@ function resolveConfig(options) {
     localeHome: { ...DEFAULTS.localeHome, ...(options.localeHome ?? {}) },
     errorLocale: options.errorLocale ?? DEFAULTS.errorLocale,
     ui: options.ui ?? {},
+    toc: options.toc ?? DEFAULTS.toc,
   };
   merged.defaultLocale = merged.locales[0];
   return merged;

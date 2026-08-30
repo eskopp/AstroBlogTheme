@@ -10,14 +10,18 @@ interface Heading {
 interface Props {
   headings: Heading[];
   locale?: Locale;
+  variant?: "inline" | "aside";
 }
-const { headings, locale = defaultLocale } = Astro.props;
+const { headings, locale = defaultLocale, variant = "inline" } = Astro.props;
 const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
 ---
 
 {
   items.length >= 3 && (
-    <nav class="toc" aria-label={t("tableOfContents", locale)}>
+    <nav
+      class:list={["toc", `toc--${variant}`]}
+      aria-label={t("tableOfContents", locale)}
+    >
       <p class="toc__title">{t("tableOfContents", locale)}</p>
       <ol>
         {items.map((h) => (

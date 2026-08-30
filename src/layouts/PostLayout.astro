@@ -2,6 +2,7 @@
 import type { CollectionEntry } from "astro:content";
 import BaseLayout from "./BaseLayout.astro";
 import FormattedDate from "../components/FormattedDate.astro";
+import config from "virtual:astro-blog-theme/config";
 import Toc from "../components/Toc.astro";
 import PostCard from "../components/PostCard.astro";
 import { tagSlug } from "../tags";
@@ -40,6 +41,7 @@ const articleMeta = {
   published: pubDate.toISOString(),
   modified: updatedDate?.toISOString(),
 };
+const showToc = (post.data.toc ?? config.toc) !== false;
 ---
 
 <BaseLayout
@@ -50,7 +52,9 @@ const articleMeta = {
   articleMeta={articleMeta}
   locale={locale}
   alternates={alternates}
+  wide
 >
+  <div class:list={["post-layout", { "has-toc": showToc }]}>
   <article class="post">
     <header class="post__header">
       <h1>{title}</h1>
@@ -101,7 +105,7 @@ const articleMeta = {
       )
     }
 
-    <Toc headings={headings} locale={locale} />
+    {showToc && <Toc headings={headings} locale={locale} variant="inline" />}
 
     <div class="prose">
       <slot />
@@ -139,4 +143,6 @@ const articleMeta = {
       )
     }
   </article>
+  {showToc && <Toc headings={headings} locale={locale} variant="aside" />}
+  </div>
 </BaseLayout>

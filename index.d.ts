@@ -43,6 +43,8 @@ export interface BlogThemeOptions {
   postsPerPage?: number;
   /** Show the header search box and inject `/search.json`. Default `true`. */
   search?: boolean;
+  /** Show the table of contents on posts. Per-post `toc` frontmatter overrides. Default `true`. */
+  toc?: boolean;
   /** Inject `/blog`, `/blog/[...slug]`, `/rss.xml` and `/404`. Default `true`. */
   injectRoutes?: boolean;
   /** Add `@astrojs/sitemap` unless already present. Default `true`. */
