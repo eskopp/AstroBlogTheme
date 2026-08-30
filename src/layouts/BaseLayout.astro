@@ -111,7 +111,38 @@ const {
         pre.appendChild(btn);
       }
 
-      // 3. Back-to-top button.
+      // 3. Heading anchors: copy the full URL, flash the heading.
+      const flash = (el) => {
+        if (!el) return;
+        el.classList.remove("anchor-flash");
+        void el.offsetWidth;
+        el.classList.add("anchor-flash");
+      };
+      for (const a of document.querySelectorAll(".prose a.heading-anchor")) {
+        a.addEventListener("click", (ev) => {
+          ev.preventDefault();
+          const id = (a.getAttribute("href") || "").slice(1);
+          const heading = document.getElementById(id);
+          if (heading) heading.scrollIntoView({ behavior: "smooth", block: "start" });
+          history.replaceState(null, "", "#" + id);
+          flash(heading);
+          try {
+            navigator.clipboard.writeText(
+              location.origin + location.pathname + "#" + id,
+            );
+          } catch (e) {
+            /* clipboard unavailable */
+          }
+        });
+      }
+      if (location.hash.length > 1) {
+        const target = document.getElementById(
+          decodeURIComponent(location.hash.slice(1)),
+        );
+        if (target && target.closest(".prose")) flash(target);
+      }
+
+      // 4. Back-to-top button.
       const toTop = document.querySelector("[data-to-top]");
       if (toTop) {
         toTop.addEventListener("click", () =>

@@ -871,8 +871,33 @@ th {
 
 /* heading anchors */
 
+.prose :where(h1, h2, h3, h4, h5, h6) {
+  scroll-margin-top: 5rem;
+}
+
 .prose :where(h2, h3, h4) {
   position: relative;
+}
+
+@keyframes anchor-flash {
+  from {
+    background: color-mix(in srgb, var(--accent) 22%, transparent);
+  }
+  to {
+    background: transparent;
+  }
+}
+
+.prose .anchor-flash {
+  animation: anchor-flash 1.4s ease-out;
+  border-radius: 4px;
+  box-decoration-break: clone;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prose .anchor-flash {
+    animation: none;
+  }
 }
 
 .heading-anchor {
