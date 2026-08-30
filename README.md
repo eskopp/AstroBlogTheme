@@ -1,7 +1,7 @@
 # AstroBlogTheme
 
 ![AI-assisted](https://img.shields.io/badge/AI--assisted-Claude-8A63D2?logo=anthropic&logoColor=white)
-![Human-reviewed](https://img.shields.io/badge/Human--reviewed-yes-2ea44f)]
+![Human-reviewed](https://img.shields.io/badge/Human--reviewed-yes-2ea44f)
 
 A reusable Astro blog theme, packaged as an **Astro integration** and imported
 straight from GitHub, the way a Hugo theme is pulled in as a module. Your blog
