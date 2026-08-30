@@ -107,7 +107,7 @@ if (article && articleMeta) {
 
 {jsonLd.map((entry) => <script type="application/ld+json" set:html={JSON.stringify(entry)} />)}
 
-<script is:inline>
+<script is:inline define:vars={{ colorScheme: config.colorScheme }}>
   const root = document.documentElement;
   const stored = (() => {
     try {
@@ -116,10 +116,14 @@ if (article && articleMeta) {
       return null;
     }
   })();
-  root.dataset.theme =
-    stored === "light" || stored === "dark"
-      ? stored
-      : window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? "dark"
-        : "light";
+  let theme = stored === "light" || stored === "dark" ? stored : null;
+  if (!theme) {
+    theme =
+      colorScheme === "light" || colorScheme === "dark"
+        ? colorScheme
+        : window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light";
+  }
+  root.dataset.theme = theme;
 </script>

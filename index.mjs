@@ -42,6 +42,7 @@ const DEFAULTS = {
   toc: true,
   mermaid: false,
   math: false,
+  colorScheme: "system",
 };
 
 function resolveConfig(options) {
@@ -61,6 +62,7 @@ function resolveConfig(options) {
     toc: options.toc ?? DEFAULTS.toc,
     mermaid: options.mermaid ?? DEFAULTS.mermaid,
     math: options.math ?? DEFAULTS.math,
+    colorScheme: options.colorScheme ?? DEFAULTS.colorScheme,
   };
   merged.defaultLocale = merged.locales[0];
   return merged;

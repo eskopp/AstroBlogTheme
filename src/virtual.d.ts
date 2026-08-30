@@ -24,6 +24,7 @@ declare module "virtual:astro-blog-theme/config" {
     toc: boolean;
     mermaid: boolean;
     math: boolean;
+    colorScheme: "system" | "light" | "dark";
   }
   const config: ThemeConfig;
   export default config;
