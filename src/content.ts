@@ -31,8 +31,14 @@ export const blogSchema = ({ image }: SchemaContext) =>
     /** Whether AI was used while writing this post. */
     ai: z.boolean().default(false),
     /**
+     * URL slug for this post. Defaults to the folder name. Carries the language.
+     * Not called `slug` on purpose — Astro's glob loader would treat that as the
+     * entry id and break the folder/locale layout.
+     */
+    urlSlug: z.string().optional(),
+    /**
      * Links this post to its translations. Defaults to the post's folder path,
-     * so `blog/autohaus/de.md` and `blog/autohaus/en.md` are linked
+     * so `blog/hello-world/de.md` and `blog/hello-world/en.md` are linked
      * automatically. Set it only to override that.
      */
     translationKey: z.string().optional(),

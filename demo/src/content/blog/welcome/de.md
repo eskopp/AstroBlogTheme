@@ -3,6 +3,7 @@ title: "Willkommen"
 description: "Ein Startbeitrag, damit die Demo etwas anzuzeigen hat."
 pubDate: 2026-08-30
 tags: ["meta"]
+urlSlug: "willkommen"
 ai: true
 ---
 

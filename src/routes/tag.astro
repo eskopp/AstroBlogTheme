@@ -3,7 +3,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import PostCard from "../components/PostCard.astro";
 import { getPosts } from "../posts";
 import { tagSlug } from "../tags";
-import { defaultLocale, localeHref, t } from "../i18n";
+import { defaultLocale, t } from "../i18n";
 
 export async function getStaticPaths() {
   const posts = await getPosts(defaultLocale);
@@ -31,7 +31,7 @@ const locale = defaultLocale;
   description={t("postsTagged", locale, { tag: tagName })}
 >
   <p class="tag-page__back">
-    <a href={localeHref(locale, "/tags")}>← {t("allTags", locale)}</a>
+    <a href="/tags">← {t("allTags", locale)}</a>
   </p>
   <h1>#{tagName}</h1>
   <ul class="post-list">

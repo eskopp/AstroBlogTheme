@@ -1,9 +1,9 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getTags } from "../tags";
-import { localeFromPath, localeHref, t } from "../i18n";
+import { defaultLocale, t } from "../i18n";
 
-const locale = localeFromPath(Astro.url.pathname);
+const locale = defaultLocale;
 const tags = await getTags(locale);
 ---
 
@@ -16,7 +16,7 @@ const tags = await getTags(locale);
       <ul class="tag-cloud">
         {tags.map((tag) => (
           <li>
-            <a href={localeHref(locale, `/tags/${tag.slug}/`)}>
+            <a href={`/tags/${tag.slug}/`}>
               {tag.name} <span class="tag-cloud__count">{tag.count}</span>
             </a>
           </li>

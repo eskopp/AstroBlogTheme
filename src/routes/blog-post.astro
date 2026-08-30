@@ -1,15 +1,29 @@
 ---
 import { render } from "astro:content";
 import PostLayout from "../layouts/PostLayout.astro";
-import { getPosts } from "../posts";
-import { postSlug } from "../i18n";
+import { getAllPosts } from "../posts";
+import { postLocale, postSlug } from "../i18n";
 
 export async function getStaticPaths() {
-  const posts = await getPosts();
-  return posts.map((post, index) => ({
-    params: { slug: postSlug(post.id) },
-    props: { post, next: posts[index - 1], prev: posts[index + 1] },
-  }));
+  const all = await getAllPosts();
+  // prev / next stay within the same language
+  const byLocale = new Map<string, typeof all>();
+  for (const post of all) {
+    const loc = postLocale(post.id);
+    if (!byLocale.has(loc)) byLocale.set(loc, []);
+    byLocale.get(loc)!.push(post);
+  }
+
+  const paths = [];
+  for (const posts of byLocale.values()) {
+    posts.forEach((post, i) => {
+      paths.push({
+        params: { slug: postSlug(post) },
+        props: { post, next: posts[i - 1], prev: posts[i + 1] },
+      });
+    });
+  }
+  return paths;
 }
 
 const { post, prev, next } = Astro.props;

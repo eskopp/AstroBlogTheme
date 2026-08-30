@@ -2,9 +2,9 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PostCard from "../components/PostCard.astro";
 import { getPosts } from "../posts";
-import { localeFromPath, t } from "../i18n";
+import { defaultLocale, t } from "../i18n";
 
-const locale = localeFromPath(Astro.url.pathname);
+const locale = defaultLocale;
 const posts = await getPosts(locale);
 
 const groups = new Map<number, typeof posts>();

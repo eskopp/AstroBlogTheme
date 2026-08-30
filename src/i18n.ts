@@ -7,44 +7,40 @@ export const defaultLocale = config.locales[0];
 export type Locale = string;
 
 /**
- * Layout: one folder per post, one file per language inside it, named after the
- * locale — e.g. `blog/autohaus/de.md`, `blog/autohaus/en.md`. The folder path is
- * the slug and the translation key; the filename is the locale.
+ * Layout: one folder per post, one file per language named after the locale —
+ * `blog/hello-world/de.md`, `blog/hello-world/en.md`. The folder path links the
+ * translations; each file sets its own `slug` (defaults to the folder name).
+ * There is no locale URL prefix — the slug carries the language.
  */
 
-/** Locale of a post from its filename (`autohaus/de` -> `"de"`). */
+/** Locale of a post from its filename (`hello-world/de` -> `"de"`). */
 export function postLocale(id: string): Locale {
   const seg = id.split("/").pop() ?? "";
   return locales.includes(seg) ? seg : defaultLocale;
 }
 
-/** Slug of a post = its folder path (`cars/autohaus/de` -> `"cars/autohaus"`). */
-export function postSlug(id: string): string {
+/** Folder path that ties translations together (`a/hello-world/de` -> `a/hello-world`). */
+export function folderKey(id: string): string {
   const parts = id.split("/");
   return locales.includes(parts.at(-1) ?? "")
     ? parts.slice(0, -1).join("/")
     : id;
 }
 
-/** Key two posts share when they are translations of each other. */
-export function translationKey(post: CollectionEntry<"blog">): string {
-  return post.data.translationKey ?? postSlug(post.id);
+/** URL slug of a post: its `urlSlug` frontmatter, else the folder name. */
+export function postSlug(post: CollectionEntry<"blog">): string {
+  if (post.data.urlSlug) return post.data.urlSlug;
+  const key = folderKey(post.id);
+  return key.split("/").pop() ?? key;
 }
 
-/** Prefix a root-relative path with the locale unless it is the default. */
-export function localeHref(locale: Locale, path: string): string {
-  const clean = path.startsWith("/") ? path : `/${path}`;
-  return locale === defaultLocale ? clean : `/${locale}${clean}`;
+/** Key two posts share when they are translations of each other. */
+export function translationKey(post: CollectionEntry<"blog">): string {
+  return post.data.translationKey ?? folderKey(post.id);
 }
 
 export function blogPostHref(post: CollectionEntry<"blog">): string {
-  return localeHref(postLocale(post.id), `/blog/${postSlug(post.id)}/`);
-}
-
-/** Detect the active locale from a request pathname. */
-export function localeFromPath(pathname: string): Locale {
-  const seg = pathname.replace(/^\/+/, "").split("/")[0];
-  return locales.includes(seg) && seg !== defaultLocale ? seg : defaultLocale;
+  return `/blog/${postSlug(post)}/`;
 }
 
 const STRINGS: Record<string, Record<string, string>> = {

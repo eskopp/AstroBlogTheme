@@ -1,6 +1,6 @@
 ---
 import config from "virtual:astro-blog-theme/config";
-import { defaultLocale, localeHref, type Locale } from "../i18n";
+import { defaultLocale, type Locale } from "../i18n";
 
 interface Props {
   title?: string;
@@ -25,7 +25,6 @@ const pageTitle = title ? `${title} · ${config.title}` : config.title;
 const canonical = new URL(Astro.url.pathname, base);
 const socialImage = new URL(image, base);
 const ogLocale = config.localeMeta?.[locale] ?? config.locale;
-const rssHref = new URL(localeHref(locale, "/rss.xml"), base);
 ---
 
 <meta charset="utf-8" />
@@ -37,15 +36,11 @@ const rssHref = new URL(localeHref(locale, "/rss.xml"), base);
   rel="alternate"
   type="application/rss+xml"
   title={config.title}
-  href={rssHref}
+  href={new URL("/rss.xml", base)}
 />
 {
   alternates.map((alt) => (
-    <link
-      rel="alternate"
-      hreflang={alt.locale}
-      href={new URL(alt.href, base)}
-    />
+    <link rel="alternate" hreflang={alt.locale} href={new URL(alt.href, base)} />
   ))
 }
 {

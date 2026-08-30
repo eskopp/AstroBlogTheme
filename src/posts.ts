@@ -23,16 +23,13 @@ export async function getAllPosts(): Promise<Post[]> {
   return (await getCollection("blog", ({ data }) => !data.draft)).sort(byDate);
 }
 
-/** The same post in the other available locales: `{ locale, href }`. */
+/** The same post in the other available locales. */
 export async function getTranslations(post: Post) {
   const key = translationKey(post);
   const all = await getCollection("blog", ({ data }) => !data.draft);
   return all
     .filter((p) => translationKey(p) === key && p.id !== post.id)
-    .map((p) => ({
-      locale: postLocale(p.id),
-      slug: postSlug(p.id),
-    }));
+    .map((p) => ({ locale: postLocale(p.id), slug: postSlug(p) }));
 }
 
 export { postLocale, postSlug };

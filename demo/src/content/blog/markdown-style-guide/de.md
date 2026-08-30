@@ -4,6 +4,7 @@ description: "Ein Referenzbeitrag zum Prüfen des Stylings nach Änderungen an d
 pubDate: 2026-08-24
 updatedDate: 2026-08-28
 tags: ["referenz"]
+urlSlug: "markdown-stilfibel"
 ---
 
 Mit diesem Beitrag prüfst du, ob Überschriften, Code, Zitate und Listen richtig

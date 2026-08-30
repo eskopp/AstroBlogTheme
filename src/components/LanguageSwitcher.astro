@@ -1,33 +1,32 @@
 ---
 import config from "virtual:astro-blog-theme/config";
-import { defaultLocale, localeHref, type Locale } from "../i18n";
+import type { Locale } from "../i18n";
 
 interface Props {
   locale: Locale;
-  alternates?: { locale: Locale; href: string }[];
+  alternates: { locale: Locale; href: string }[];
 }
-const { locale, alternates = [] } = Astro.props;
+const { locale, alternates } = Astro.props;
 
-const hrefFor = (target: Locale): string => {
-  if (target === locale) return "";
-  const alt = alternates.find((a) => a.locale === target);
-  return alt ? alt.href : localeHref(target, "/");
-};
+const label = (loc: Locale) => config.localeLabels?.[loc] ?? loc.toUpperCase();
 ---
 
 <div class="lang-switch" role="group" aria-label="Language">
   {
-    config.locales.map((loc: Locale, i: number) => (
-      <>
-        {i > 0 && <span class="lang-switch__sep" aria-hidden="true">/</span>}
-        {loc === locale ? (
-          <span class="lang-switch__current" aria-current="true">
-            {config.localeLabels?.[loc] ?? loc.toUpperCase()}
-          </span>
-        ) : (
-          <a href={hrefFor(loc)}>{config.localeLabels?.[loc] ?? loc.toUpperCase()}</a>
-        )}
-      </>
-    ))
+    config.locales.map((loc: Locale, i: number) => {
+      const alt = alternates.find((a) => a.locale === loc);
+      return (
+        <>
+          {i > 0 && <span class="lang-switch__sep" aria-hidden="true">/</span>}
+          {loc === locale ? (
+            <span class="lang-switch__current" aria-current="true">{label(loc)}</span>
+          ) : alt ? (
+            <a href={alt.href}>{label(loc)}</a>
+          ) : (
+            <span class="lang-switch__disabled" aria-disabled="true">{label(loc)}</span>
+          )}
+        </>
+      );
+    })
   }
 </div>

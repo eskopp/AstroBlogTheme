@@ -57,9 +57,6 @@ export default function blogTheme(options = {}) {
   const config = resolveConfig(options);
   const injectRoutes = options.injectRoutes !== false;
   const withSitemap = options.sitemap !== false;
-  const { locales, defaultLocale } = config;
-  const multilang = locales.length > 1;
-
   return {
     name: "astro-blog-theme",
     hooks: {
@@ -73,16 +70,6 @@ export default function blogTheme(options = {}) {
           vite: { plugins: [virtualConfigPlugin(config)] },
         });
 
-        if (multilang && !astroConfig.i18n) {
-          updateConfig({
-            i18n: {
-              defaultLocale,
-              locales: [...locales],
-              routing: { prefixDefaultLocale: false },
-            },
-          });
-        }
-
         if (
           withSitemap &&
           !astroConfig.integrations.some((i) => i.name === "@astrojs/sitemap")
@@ -92,39 +79,21 @@ export default function blogTheme(options = {}) {
 
         if (injectRoutes) {
           const at = (name) => `astro-blog-theme/routes/${name}`;
-
-          // routes without params: one per locale, locale inferred from the URL
-          for (const loc of locales) {
-            const p = loc === defaultLocale ? "" : `/${loc}`;
-            injectRoute({ pattern: `${p}/blog`, entrypoint: at("blog-index.astro") });
-            injectRoute({ pattern: `${p}/tags`, entrypoint: at("tags-index.astro") });
-            injectRoute({ pattern: `${p}/rss.xml`, entrypoint: at("rss.xml.ts") });
-            injectRoute({ pattern: `${p}/llms.txt`, entrypoint: at("llms.txt.ts") });
-            if (config.search) {
-              injectRoute({
-                pattern: `${p}/search.json`,
-                entrypoint: at("search.json.ts"),
-              });
-            }
-          }
-
-          // parameterised routes: default locale unprefixed, others under [locale]
+          injectRoute({ pattern: "/blog", entrypoint: at("blog-index.astro") });
           injectRoute({
             pattern: "/blog/[...slug]",
             entrypoint: at("blog-post.astro"),
           });
+          injectRoute({ pattern: "/tags", entrypoint: at("tags-index.astro") });
           injectRoute({ pattern: "/tags/[tag]", entrypoint: at("tag.astro") });
-          if (multilang) {
+          injectRoute({ pattern: "/rss.xml", entrypoint: at("rss.xml.ts") });
+          injectRoute({ pattern: "/llms.txt", entrypoint: at("llms.txt.ts") });
+          if (config.search) {
             injectRoute({
-              pattern: "/[locale]/blog/[...slug]",
-              entrypoint: at("blog-post-loc.astro"),
-            });
-            injectRoute({
-              pattern: "/[locale]/tags/[tag]",
-              entrypoint: at("tag-loc.astro"),
+              pattern: "/search.json",
+              entrypoint: at("search.json.ts"),
             });
           }
-
           injectRoute({ pattern: "/404", entrypoint: at("404.astro") });
         }
 

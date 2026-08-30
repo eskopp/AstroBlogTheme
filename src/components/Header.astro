@@ -3,7 +3,7 @@ import config from "virtual:astro-blog-theme/config";
 import ThemeToggle from "./ThemeToggle.astro";
 import Search from "./Search.astro";
 import LanguageSwitcher from "./LanguageSwitcher.astro";
-import { defaultLocale, localeHref, type Locale } from "../i18n";
+import { defaultLocale, type Locale } from "../i18n";
 
 interface Props {
   locale?: Locale;
@@ -17,28 +17,25 @@ const isActive = (href: string) =>
     ? pathname === "/"
     : pathname === href || pathname.startsWith(`${href}/`);
 
-const multilang = config.locales.length > 1;
+const showSwitcher = config.locales.length > 1 && alternates.length > 0;
 ---
 
 <header class="site-header">
   <div class="site-header__inner">
-    <a class="site-header__brand" href={localeHref(locale, "/")}>{config.title}</a>
+    <a class="site-header__brand" href="/">{config.title}</a>
     <nav class="site-nav" aria-label="Primary">
       {
-        config.nav.map((link) => {
-          const href = localeHref(locale, link.href);
-          return (
-            <a
-              href={href}
-              aria-current={isActive(href) ? "page" : undefined}
-            >
-              {link.label}
-            </a>
-          );
-        })
+        config.nav.map((link) => (
+          <a
+            href={link.href}
+            aria-current={isActive(link.href) ? "page" : undefined}
+          >
+            {link.label}
+          </a>
+        ))
       }
       {config.search && <Search />}
-      {multilang && <LanguageSwitcher locale={locale} alternates={alternates} />}
+      {showSwitcher && <LanguageSwitcher locale={locale} alternates={alternates} />}
       <ThemeToggle />
     </nav>
   </div>

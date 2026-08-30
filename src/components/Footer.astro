@@ -1,15 +1,6 @@
 ---
 import config from "virtual:astro-blog-theme/config";
-import { defaultLocale, localeHref, type Locale } from "../i18n";
-
-interface Props {
-  locale?: Locale;
-}
-const { locale = defaultLocale } = Astro.props;
 const year = new Date().getFullYear();
-
-const resolve = (href: string) =>
-  href.startsWith("/") ? localeHref(locale, href) : href;
 ---
 
 <footer class="site-footer">
@@ -20,7 +11,7 @@ const resolve = (href: string) =>
         config.social.map((link, i) => (
           <>
             {i > 0 && <span aria-hidden="true"> · </span>}
-            <a href={resolve(link.href)}>{link.label}</a>
+            <a href={link.href}>{link.label}</a>
           </>
         ))
       }

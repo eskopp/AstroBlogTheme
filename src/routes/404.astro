@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { defaultLocale, localeHref, t } from "../i18n";
+import { defaultLocale, t } from "../i18n";
 
 const locale = defaultLocale;
 ---
@@ -9,6 +9,6 @@ const locale = defaultLocale;
   <div class="notfound">
     <h1>404</h1>
     <p>{t("notFoundBody", locale)}</p>
-    <p><a href={localeHref(locale, "/")}>{t("backHome", locale)}</a></p>
+    <p><a href="/">{t("backHome", locale)}</a></p>
   </div>
 </BaseLayout>
