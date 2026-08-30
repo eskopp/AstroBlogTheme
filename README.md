@@ -1,26 +1,12 @@
 # AstroBlogTheme
 
-[![AI-assisted](https://img.shields.io/badge/AI--assisted-Claude-8A63D2?logo=anthropic&logoColor=white)](#ai-disclosure)
-[![Human-reviewed](https://img.shields.io/badge/Human--reviewed-yes-2ea44f)](#ai-disclosure)
+![AI-assisted](https://img.shields.io/badge/AI--assisted-Claude-8A63D2?logo=anthropic&logoColor=white)
+![Human-reviewed](https://img.shields.io/badge/Human--reviewed-yes-2ea44f)]
 
 A reusable Astro blog theme, packaged as an **Astro integration** and imported
 straight from GitHub, the way a Hugo theme is pulled in as a module. Your blog
 project stays tiny: a config, a content-collection definition, and your posts.
 
-> ## AI disclosure
->
-> This project was built with substantial help from AI. Anthropic's **Claude**
-> (via Claude Code) generated most of the initial code, configuration and
-> documentation. Every change is reviewed, tested and maintained by a human
-> ([@eskopp](https://github.com/eskopp)) before it lands on `main` or in a
-> release. Issues and pull requests are handled by a human.
-
-- Injected routes: `/blog`, `/blog/[...slug]`, `/rss.xml`, `/404`
-- Light / dark mode with a no-flash toggle
-- `@astrojs/sitemap` wired up automatically
-- Open Graph and Twitter Card metadata
-- No client JavaScript beyond the theme toggle
-- No build step in the package — Astro consumes the `.astro` sources directly
 
 ## Install from GitHub
 
