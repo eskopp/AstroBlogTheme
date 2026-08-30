@@ -12,6 +12,7 @@ declare module "virtual:astro-blog-theme/config" {
     nav: ThemeNavLink[];
     social: ThemeNavLink[];
     postsPerPage: number;
+    search: boolean;
   }
   const config: ThemeConfig;
   export default config;

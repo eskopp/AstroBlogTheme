@@ -22,6 +22,8 @@ export interface BlogThemeOptions {
   social?: NavLink[];
   /** Number of posts on the home page. Default `5`. */
   postsPerPage?: number;
+  /** Show the header search box and inject `/search.json`. Default `true`. */
+  search?: boolean;
   /** Inject `/blog`, `/blog/[...slug]`, `/rss.xml` and `/404`. Default `true`. */
   injectRoutes?: boolean;
   /** Add `@astrojs/sitemap` unless already present. Default `true`. */

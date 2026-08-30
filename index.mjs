@@ -12,6 +12,7 @@ const DEFAULTS = {
   ],
   social: [{ href: "/rss.xml", label: "RSS" }],
   postsPerPage: 5,
+  search: true,
 };
 
 function resolveConfig(options) {
@@ -85,6 +86,12 @@ export default function blogTheme(options = {}) {
             pattern: "/404",
             entrypoint: "astro-blog-theme/routes/404.astro",
           });
+          if (config.search) {
+            injectRoute({
+              pattern: "/search.json",
+              entrypoint: "astro-blog-theme/routes/search.json.ts",
+            });
+          }
         }
 
         if (!astroConfig.site) {

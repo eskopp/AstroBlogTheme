@@ -1,6 +1,7 @@
 ---
 import config from "virtual:astro-blog-theme/config";
 import ThemeToggle from "./ThemeToggle.astro";
+import Search from "./Search.astro";
 
 const pathname = Astro.url.pathname.replace(/\/$/, "") || "/";
 const isActive = (href: string) =>
@@ -23,6 +24,7 @@ const isActive = (href: string) =>
           </a>
         ))
       }
+      {config.search && <Search />}
       <ThemeToggle />
     </nav>
   </div>
