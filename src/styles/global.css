@@ -156,6 +156,25 @@ pre code {
   font-size: inherit;
 }
 
+/* reading progress bar */
+.reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 50;
+  pointer-events: none;
+}
+
+.reading-progress__bar {
+  height: 100%;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  will-change: transform;
+}
+
 /* katex math */
 .prose .katex-display {
   overflow-x: auto;
