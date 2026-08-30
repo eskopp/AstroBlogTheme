@@ -16,6 +16,7 @@ declare module "virtual:astro-blog-theme/config" {
     nav: ThemeNavLink[];
     social: ThemeNavLink[];
     legal: ThemeNavLink[];
+    license: { label: string; href: string } | null;
     postsPerPage: number;
     search: boolean;
   }

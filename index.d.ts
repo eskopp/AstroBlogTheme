@@ -33,6 +33,8 @@ export interface BlogThemeOptions {
   social?: NavLink[];
   /** Footer legal links (Impressum, Datenschutz, …), shown on a second line. */
   legal?: NavLink[];
+  /** Content licence shown in the footer next to the copyright, e.g. `{ label: "CC BY-ND 4.0", href: "https://creativecommons.org/licenses/by-nd/4.0/deed.de" }`. */
+  license?: { label: string; href: string } | null;
   /** Number of posts on the home page. Default `5`. */
   postsPerPage?: number;
   /** Show the header search box and inject `/search.json`. Default `true`. */

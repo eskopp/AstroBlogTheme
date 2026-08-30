@@ -2,11 +2,22 @@
 import config from "virtual:astro-blog-theme/config";
 const year = new Date().getFullYear();
 const legal = config.legal ?? [];
+const license = config.license;
 ---
 
 <footer class="site-footer">
   <div class="site-footer__inner">
-    <span>© {year}{config.author ? ` ${config.author}` : ""}</span>
+    <span>
+      © {year}{config.author ? ` ${config.author}` : ""}
+      {
+        license && (
+          <>
+            {" · "}
+            <a href={license.href} rel="license">{license.label}</a>
+          </>
+        )
+      }
+    </span>
     <nav aria-label="Social">
       {
         config.social.map((link, i) => (

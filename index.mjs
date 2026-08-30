@@ -15,6 +15,7 @@ const DEFAULTS = {
   ],
   social: [{ href: "/rss.xml", label: "RSS" }],
   legal: [],
+  license: null,
   postsPerPage: 5,
   search: true,
 };
@@ -26,6 +27,7 @@ function resolveConfig(options) {
     nav: options.nav ?? DEFAULTS.nav,
     social: options.social ?? DEFAULTS.social,
     legal: options.legal ?? DEFAULTS.legal,
+    license: options.license ?? DEFAULTS.license,
     locales: options.locales ?? DEFAULTS.locales,
     localeMeta: { ...DEFAULTS.localeMeta, ...(options.localeMeta ?? {}) },
     localeLabels: { ...DEFAULTS.localeLabels, ...(options.localeLabels ?? {}) },
