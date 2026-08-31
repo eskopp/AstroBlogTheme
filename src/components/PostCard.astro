@@ -1,17 +1,51 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import FormattedDate from "./FormattedDate.astro";
-import { postLocale, blogPostHref } from "../i18n";
+import { postLocale, blogPostHref, t } from "../i18n";
+import { readingTimeMinutes } from "../posts";
+import { tagUrl } from "../tags";
 
 interface Props {
   post: CollectionEntry<"blog">;
 }
 const { post } = Astro.props;
 const locale = postLocale(post.id);
+const { title, description, pubDate, heroImage, heroAlt, tags } = post.data;
+const minutes = readingTimeMinutes(post);
 ---
 
 <article class="card">
-  <h3><a href={blogPostHref(post)}>{post.data.title}</a></h3>
-  <p class="card__meta"><FormattedDate date={post.data.pubDate} locale={locale} /></p>
-  <p>{post.data.description}</p>
+  {
+    heroImage && (
+      <a class="card__media" href={blogPostHref(post)} tabindex="-1" aria-hidden="true">
+        <img
+          src={heroImage.src}
+          width={heroImage.width}
+          height={heroImage.height}
+          alt={heroAlt}
+          loading="lazy"
+        />
+      </a>
+    )
+  }
+  <div class="card__body">
+    <p class="card__meta">
+      <FormattedDate date={pubDate} locale={locale} />
+      <span class="card__dot">·</span>
+      {t("readingTime", locale, { min: minutes })}
+    </p>
+    <h3 class="card__title"><a href={blogPostHref(post)}>{title}</a></h3>
+    <p class="card__desc">{description}</p>
+    {
+      tags.length > 0 && (
+        <ul class="card__tags">
+          {tags.slice(0, 3).map((tag) => (
+            <li>
+              <a href={tagUrl(tag)}>{tag}</a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
 </article>
