@@ -135,6 +135,10 @@ alternates and a header language switcher that jumps to the translation. The
 listing routes (`/blog`, `/tags`, `/rss.xml`, `/llms.txt`, `/search.json`) and
 your own pages show the default language.
 
+With more than one locale, each language also gets its own feed at
+`/rss/<locale>.xml` (`/rss.xml` stays the default-language feed), and every page
+advertises them with `<link rel="alternate" type="application/rss+xml">`.
+
 ## Package exports
 
 | Import                                      | What                              |

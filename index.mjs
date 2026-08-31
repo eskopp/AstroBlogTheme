@@ -221,6 +221,12 @@ export default function blogTheme(options = {}) {
           injectRoute({ pattern: "/tags", entrypoint: at("tags-index.astro") });
           injectRoute({ pattern: "/tags/[tag]", entrypoint: at("tag.astro") });
           injectRoute({ pattern: "/rss.xml", entrypoint: at("rss.xml.ts") });
+          if (config.locales.length > 1) {
+            injectRoute({
+              pattern: "/rss/[locale].xml",
+              entrypoint: at("rss/[locale].xml.ts"),
+            });
+          }
           injectRoute({ pattern: "/feed.json", entrypoint: at("feed.json.ts") });
           injectRoute({ pattern: "/llms.txt", entrypoint: at("llms.txt.ts") });
           injectRoute({

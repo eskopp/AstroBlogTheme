@@ -69,6 +69,20 @@ if (article && articleMeta) {
   title={config.title}
   href={new URL("/rss.xml", base)}
 />
+{
+  config.locales.length > 1 &&
+    config.locales
+      .filter((loc: Locale) => loc !== defaultLocale)
+      .map((loc: Locale) => (
+        <link
+          rel="alternate"
+          type="application/rss+xml"
+          hreflang={loc}
+          title={`${config.title} (${config.localeLabels?.[loc] ?? loc.toUpperCase()})`}
+          href={new URL(`/rss/${loc}.xml`, base)}
+        />
+      ))
+}
 <link
   rel="alternate"
   type="application/feed+json"

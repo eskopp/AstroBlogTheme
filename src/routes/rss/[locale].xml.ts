@@ -1,19 +1,23 @@
 import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
 import config from "virtual:astro-blog-theme/config";
-import { getPosts } from "../posts";
-import { postSlug, defaultLocale } from "../i18n";
+import { getPosts } from "../../posts";
+import { postSlug, locales } from "../../i18n";
 
-/** Main feed — default-locale posts. Per-language feeds live at /rss/<locale>.xml. */
+export function getStaticPaths() {
+  return locales.map((locale: string) => ({ params: { locale } }));
+}
+
 export async function GET(context: APIContext) {
-  const posts = await getPosts(defaultLocale);
-  const lang = (config.localeMeta?.[defaultLocale] ?? defaultLocale).replace(
-    "_",
-    "-",
-  );
+  const locale = context.params.locale as string;
+  if (!locales.includes(locale)) return new Response(null, { status: 404 });
+
+  const posts = await getPosts(locale);
+  const label = config.localeLabels?.[locale] ?? locale.toUpperCase();
+  const lang = (config.localeMeta?.[locale] ?? locale).replace("_", "-");
 
   return rss({
-    title: config.title,
+    title: `${config.title} (${label})`,
     description: config.description,
     site: context.site ?? "https://example.com",
     customData: `<language>${lang}</language>`,
