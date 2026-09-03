@@ -98,6 +98,7 @@ const DEFAULTS = {
   legal: [],
   license: null,
   postsPerPage: 5,
+  postList: "cards",
   search: true,
   toc: true,
   mermaid: false,
@@ -123,6 +124,7 @@ function resolveConfig(options) {
     mermaid: options.mermaid ?? DEFAULTS.mermaid,
     math: options.math ?? DEFAULTS.math,
     colorScheme: options.colorScheme ?? DEFAULTS.colorScheme,
+    postList: options.postList === "rows" ? "rows" : DEFAULTS.postList,
   };
   merged.defaultLocale = merged.locales[0];
   return merged;

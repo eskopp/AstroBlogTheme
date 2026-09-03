@@ -106,6 +106,7 @@ Add posts to `src/content/blog/*.md`. Put `favicon.svg` (and optionally
 | `nav`          | `{ href, label }[]`             | Home + Blog                        |
 | `social`       | `{ href, label }[]`             | RSS                                |
 | `postsPerPage` | `number`                        | `5`                                |
+| `postList`     | `"cards" \| "rows"`             | `"cards"`                          |
 | `search`       | `boolean`                       | `true`                             |
 | `injectRoutes` | `boolean`                       | `true`                             |
 | `sitemap`      | `boolean`                       | `true`                             |

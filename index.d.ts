@@ -41,6 +41,8 @@ export interface BlogThemeOptions {
   license?: { label: string; href: string } | null;
   /** Number of posts on the home page. Default `5`. */
   postsPerPage?: number;
+  /** How post lists (home, /blog, /tags) render: "cards" (default) or "rows" (minimal date + title lines). */
+  postList?: "cards" | "rows";
   /** Show the header search box and inject `/search.json`. Default `true`. */
   search?: boolean;
   /** Show the table of contents on posts. Per-post `toc` frontmatter overrides. Default `true`. */

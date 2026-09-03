@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from "astro:content";
+import config from "virtual:astro-blog-theme/config";
 import FormattedDate from "./FormattedDate.astro";
 import { postLocale, blogPostHref, t } from "../i18n";
 import { readingTimeMinutes } from "../posts";
@@ -12,11 +13,12 @@ const { post } = Astro.props;
 const locale = postLocale(post.id);
 const { title, description, pubDate, heroImage, heroAlt, tags } = post.data;
 const minutes = readingTimeMinutes(post);
+const rows = config.postList === "rows";
 ---
 
 <article class="card">
   {
-    heroImage && (
+    !rows && heroImage && (
       <a class="card__media" href={blogPostHref(post)} tabindex="-1" aria-hidden="true">
         <img
           src={heroImage.src}
@@ -35,9 +37,9 @@ const minutes = readingTimeMinutes(post);
       {t("readingTime", locale, { min: minutes })}
     </p>
     <h3 class="card__title"><a href={blogPostHref(post)}>{title}</a></h3>
-    <p class="card__desc">{description}</p>
+    {!rows && <p class="card__desc">{description}</p>}
     {
-      tags.length > 0 && (
+      !rows && tags.length > 0 && (
         <ul class="card__tags">
           {tags.slice(0, 3).map((tag) => (
             <li>

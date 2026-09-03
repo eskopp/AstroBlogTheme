@@ -857,6 +857,48 @@ th {
   margin: 0 0.4rem;
 }
 
+/* post list — rows (postList: "rows") */
+
+:root[data-post-list="rows"] .post-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+:root[data-post-list="rows"] .post-list > li {
+  display: block;
+  border-bottom: 1px solid var(--border);
+}
+
+:root[data-post-list="rows"] .post-list > li:first-child {
+  border-top: 1px solid var(--border);
+}
+
+:root[data-post-list="rows"] .card {
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.95rem 0;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  overflow: visible;
+}
+
+:root[data-post-list="rows"] .card:hover {
+  transform: none;
+  box-shadow: none;
+  border: 0;
+}
+
+:root[data-post-list="rows"] .card__body {
+  padding: 0;
+  gap: 0.1rem;
+}
+
+:root[data-post-list="rows"] .card__title {
+  font-size: 1.02rem;
+}
+
 .all-posts-link {
   display: inline-block;
   margin-top: 2rem;
