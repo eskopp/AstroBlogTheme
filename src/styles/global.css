@@ -389,6 +389,15 @@ pre code {
   color: var(--accent-contrast);
 }
 
+.chess-moves__variation {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.chess-moves__variation .chess-moves__move.is-active {
+  font-style: normal;
+}
+
 .chess-engine {
   margin-top: 0.6rem;
   display: flex;

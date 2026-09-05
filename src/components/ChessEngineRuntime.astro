@@ -4,10 +4,14 @@
 <script>
   import { renderChessBoard, xyToSquare, squareToXY } from "../chess.mjs";
 
-  interface HistEntry {
+  interface MoveNode {
+    id: number;
     san: string;
     fen: string;
     lastMove: { from: string; to: string };
+    parent: MoveNode | null;
+    /** children[0] is the mainline continuation; children[1+] are side variations. */
+    children: MoveNode[];
   }
 
   interface Ctx {
@@ -21,10 +25,12 @@
     fen: string;
     lastMove: { from: string; to: string } | null;
     chess: any;
-    history: HistEntry[];
-    /** Index into `history` for the currently shown position; -1 = initial position. */
-    cursor: number;
+    root: MoveNode;
+    currentNode: MoveNode;
+    nodesById: Map<number, MoveNode>;
   }
+
+  let nextNodeId = 1;
 
   const boards = [...document.querySelectorAll<HTMLElement>(".chess-board")];
   if (
@@ -136,15 +142,27 @@
     const STANDARD_START =
       "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-    /** SAN move text up to the current cursor, e.g. "1. e4 e5 2. Nf3". */
+    /** The mainline path from the root down to (and including) `node`. */
+    function pathToNode(node: MoveNode): MoveNode[] {
+      const path: MoveNode[] = [];
+      let n: MoveNode | null = node;
+      while (n && n.parent) {
+        path.unshift(n);
+        n = n.parent;
+      }
+      return path;
+    }
+
+    /** SAN move text for the path to the current node, e.g. "1. e4 e5 2. Nf3". */
     function buildMoveText(ctx: Ctx): string {
+      const path = pathToNode(ctx.currentNode);
       let out = "";
       let moveNo = ctx.startFullmove;
       let turn = ctx.startColor;
-      if (turn === "b" && ctx.cursor >= 0) out += `${moveNo}... `;
-      for (let i = 0; i <= ctx.cursor; i++) {
+      if (turn === "b" && path.length > 0) out += `${moveNo}... `;
+      for (const node of path) {
         if (turn === "w") out += `${moveNo}. `;
-        out += ctx.history[i].san + " ";
+        out += node.san + " ";
         if (turn === "b") moveNo++;
         turn = turn === "w" ? "b" : "w";
       }
@@ -163,7 +181,7 @@
 
     /** Once moves exist, point "Open in Lichess" at the full game instead of a bare FEN. */
     function updateLichessLink(ctx: Ctx) {
-      if (ctx.cursor === -1) return;
+      if (ctx.currentNode === ctx.root) return;
       const link = ctx.board.querySelector<HTMLAnchorElement>(
         ".chess-board__lichess",
       );
@@ -176,17 +194,84 @@
       updateLichessLink(ctx);
     }
 
-    /** Append a played move at the current cursor, discarding any redone future. */
-    function pushMove(ctx: Ctx, move: any) {
-      ctx.history = ctx.history.slice(0, ctx.cursor + 1);
-      ctx.history.push({
-        san: move.san,
-        fen: ctx.chess.fen(),
-        lastMove: { from: move.from, to: move.to },
-      });
-      ctx.cursor = ctx.history.length - 1;
-      ctx.fen = ctx.chess.fen();
-      ctx.lastMove = { from: move.from, to: move.to };
+    /**
+     * Record a played move from the current node. If it already exists among
+     * the current node's children (a move already explored from here), reuse
+     * that branch instead of duplicating it. A move that diverges from the
+     * existing mainline child becomes a new side variation, not a discard.
+     */
+    function addMove(ctx: Ctx, move: any) {
+      const fen = ctx.chess.fen();
+      let node = ctx.currentNode.children.find(
+        (c) => c.san === move.san && c.fen === fen,
+      );
+      if (!node) {
+        node = {
+          id: nextNodeId++,
+          san: move.san,
+          fen,
+          lastMove: { from: move.from, to: move.to },
+          parent: ctx.currentNode,
+          children: [],
+        };
+        ctx.currentNode.children.push(node);
+        ctx.nodesById.set(node.id, node);
+      }
+      ctx.currentNode = node;
+      ctx.fen = node.fen;
+      ctx.lastMove = node.lastMove;
+    }
+
+    function renderMoveSpan(ctx: Ctx, node: MoveNode): string {
+      const active = node === ctx.currentNode ? " is-active" : "";
+      return `<span class="chess-moves__move${active}" data-id="${node.id}">${escHtml(node.san)}</span>`;
+    }
+
+    /**
+     * Recursively renders the mainline from `node` onward, plus any side
+     * variations inline as "(...)" groups right where they branch off -
+     * standard PGN/Lichess style.
+     */
+    function renderLine(
+      ctx: Ctx,
+      node: MoveNode,
+      moveNo: number,
+      turn: "w" | "b",
+      forceNumber: boolean,
+    ): string {
+      let html = "";
+      let cur = node;
+      let needsNumber = forceNumber;
+      while (cur.children.length > 0) {
+        const mainChild = cur.children[0];
+        if (turn === "w") {
+          html += `<span class="chess-moves__no">${moveNo}.</span> `;
+        } else if (needsNumber) {
+          html += `<span class="chess-moves__no">${moveNo}...</span> `;
+        }
+        html += renderMoveSpan(ctx, mainChild) + " ";
+        needsNumber = false;
+
+        for (let i = 1; i < cur.children.length; i++) {
+          const varNode = cur.children[i];
+          const nextMoveNo = turn === "w" ? moveNo : moveNo + 1;
+          const nextTurn = turn === "w" ? "b" : "w";
+          html += `<span class="chess-moves__variation">(`;
+          html +=
+            turn === "w"
+              ? `<span class="chess-moves__no">${moveNo}.</span> `
+              : `<span class="chess-moves__no">${moveNo}...</span> `;
+          html += renderMoveSpan(ctx, varNode) + " ";
+          html += renderLine(ctx, varNode, nextMoveNo, nextTurn, true);
+          html += `)</span> `;
+          needsNumber = true;
+        }
+
+        if (turn === "b") moveNo++;
+        turn = turn === "w" ? "b" : "w";
+        cur = mainChild;
+      }
+      return html;
     }
 
     function renderMoveList(ctx: Ctx) {
@@ -196,36 +281,36 @@
       const resetBtn = ctx.controlsNode?.querySelector<HTMLButtonElement>(
         ".chess-controls__reset",
       );
-      if (resetBtn) resetBtn.disabled = ctx.cursor === -1 && ctx.history.length === 0;
+      if (resetBtn) {
+        resetBtn.disabled =
+          ctx.currentNode === ctx.root && ctx.root.children.length === 0;
+      }
       if (!container) return;
 
-      let html = "";
-      let moveNo = ctx.startFullmove;
-      let turn = ctx.startColor;
-      if (turn === "b" && ctx.history.length > 0) {
-        html += `<span class="chess-moves__no">${moveNo}...</span>`;
-      }
-      for (let i = 0; i < ctx.history.length; i++) {
-        if (turn === "w") html += `<span class="chess-moves__no">${moveNo}.</span>`;
-        const active = i === ctx.cursor ? " is-active" : "";
-        html += `<span class="chess-moves__move${active}" data-idx="${i}">${escHtml(ctx.history[i].san)}</span>`;
-        if (turn === "b") moveNo++;
-        turn = turn === "w" ? "b" : "w";
-      }
-      container.innerHTML = html;
-      container.querySelectorAll<HTMLElement>(".chess-moves__move").forEach((el, i) => {
-        el.addEventListener("click", () => gotoHistory(ctx, i));
+      const forceNumber = ctx.startColor === "b" && ctx.root.children.length > 0;
+      container.innerHTML = renderLine(
+        ctx,
+        ctx.root,
+        ctx.startFullmove,
+        ctx.startColor,
+        forceNumber,
+      );
+      container.querySelectorAll<HTMLElement>("[data-id]").forEach((el) => {
+        const id = parseInt(el.dataset.id || "", 10);
+        el.addEventListener("click", () => {
+          const node = ctx.nodesById.get(id);
+          if (node) gotoNode(ctx, node);
+        });
       });
     }
 
-    async function gotoHistory(ctx: Ctx, index: number) {
+    async function gotoNode(ctx: Ctx, node: MoveNode) {
       if (active?.ctx === ctx) await active.stop();
       const Chess = await ensureChess();
-      const fen = index === -1 ? ctx.initialFen : ctx.history[index].fen;
-      ctx.cursor = index;
-      ctx.fen = fen;
-      ctx.chess = new Chess(fen);
-      ctx.lastMove = index === -1 ? null : ctx.history[index].lastMove;
+      ctx.currentNode = node;
+      ctx.fen = node.fen;
+      ctx.chess = new Chess(node.fen);
+      ctx.lastMove = node === ctx.root ? null : node.lastMove;
       refreshBoardUI(ctx);
     }
 
@@ -256,7 +341,7 @@
         renderBoard(ctx);
         return;
       }
-      pushMove(ctx, move);
+      addMove(ctx, move);
       refreshBoardUI(ctx);
 
       if (active?.ctx === ctx) {
@@ -338,7 +423,7 @@
           break;
         }
         if (!move) break;
-        pushMove(ctx, move);
+        addMove(ctx, move);
       }
       refreshBoardUI(ctx);
     }
@@ -521,6 +606,14 @@
 
       const initialFen = board.dataset.fen || "";
       const startFields = initialFen.split(/\s+/);
+      const root: MoveNode = {
+        id: nextNodeId++,
+        san: "",
+        fen: initialFen,
+        lastMove: { from: "", to: "" },
+        parent: null,
+        children: [],
+      };
       const ctx: Ctx = {
         board,
         engineNode,
@@ -532,8 +625,9 @@
         fen: initialFen,
         lastMove: null,
         chess: null,
-        history: [],
-        cursor: -1,
+        root,
+        currentNode: root,
+        nodesById: new Map([[root.id, root]]),
       };
       attachPieceHandlers(ctx);
       engineNode
@@ -547,7 +641,7 @@
         });
       controlsNode
         ?.querySelector<HTMLButtonElement>(".chess-controls__reset")
-        ?.addEventListener("click", () => gotoHistory(ctx, -1));
+        ?.addEventListener("click", () => gotoNode(ctx, ctx.root));
     }
   }
 </script>
