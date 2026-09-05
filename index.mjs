@@ -120,13 +120,17 @@ function remarkChessPassthrough(config) {
         throw new Error(`${seg}: invalid \`\`\`fen block: ${err.message}`);
       }
 
+      const fen = node.value.trim().replace(/"/g, "&quot;");
+      const fenFields = node.value.trim().split(/\s+/);
+      const resolvedOrientation =
+        orientation ?? (fenFields[1] === "b" ? "black" : "white");
+
       let engine = "";
       if (config.chessEngine) {
         const locale = localeFromFile(file, config);
         const l = { ...CHESS_ENGINE_LABELS.en, ...(CHESS_ENGINE_LABELS[locale] || {}) };
-        const fen = node.value.trim().replace(/"/g, "&quot;");
         engine =
-          `<div class="chess-engine" hidden data-fen="${fen}">` +
+          `<div class="chess-engine" hidden>` +
           `<button type="button" class="chess-engine__toggle" ` +
           `data-label-load="${l.load}" data-label-loading="${l.loading}" ` +
           `data-label-stop="${l.stop}" data-label-stopping="${l.stopping}" ` +
@@ -137,7 +141,9 @@ function remarkChessPassthrough(config) {
 
       parent.children[index] = {
         type: "html",
-        value: `<div class="chess-board">${board}${engine}</div>`,
+        value:
+          `<div class="chess-board" data-fen="${fen}" data-orientation="${resolvedOrientation}">` +
+          `${board}${engine}</div>`,
       };
     });
   };

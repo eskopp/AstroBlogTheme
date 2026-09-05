@@ -43,6 +43,25 @@ function parsePlacement(placement) {
 
 const FILES = "abcdefgh";
 
+/** Top-left corner (in SVG user units) of a square, e.g. "e4" -> {x,y}. */
+export function squareToXY(square, orientation = "white") {
+  const file = FILES.indexOf(square[0]);
+  const rank = parseInt(square[1], 10) - 1;
+  const r = orientation === "white" ? 7 - rank : rank;
+  const f = orientation === "white" ? file : 7 - file;
+  return { x: f * SQ, y: r * SQ };
+}
+
+/** Inverse of `squareToXY`: SVG point -> square name, or null if off-board. */
+export function xyToSquare(x, y, orientation = "white") {
+  const f = Math.floor(x / SQ);
+  const r = Math.floor(y / SQ);
+  if (f < 0 || f > 7 || r < 0 || r > 7) return null;
+  const rank = orientation === "white" ? 7 - r : r;
+  const file = orientation === "white" ? f : 7 - f;
+  return FILES[file] + (rank + 1);
+}
+
 /**
  * Renders a chess position (FEN piece-placement field, or a full FEN string)
  * to a self-contained inline SVG string. Pure and build-time only — no
@@ -71,7 +90,9 @@ export function renderChessBoard(fen, options = {}) {
     .map((p) => `<symbol id="p-${p}" viewBox="0 0 45 45">${PIECE_PATHS[p]}</symbol>`)
     .join("");
 
+  const lastMove = options.lastMove;
   let squaresSvg = "";
+  let highlightSvg = "";
   let piecesSvg = "";
   for (let r = 0; r < 8; r++) {
     for (let f = 0; f < 8; f++) {
@@ -79,9 +100,10 @@ export function renderChessBoard(fen, options = {}) {
       const file = orientation === "white" ? f : 7 - f;
       const x = f * SQ;
       const y = r * SQ;
+      const square = FILES[file] + (rank + 1);
       const isLight = (rank + file) % 2 === 1;
       const fill = isLight ? "var(--chess-light, #f0d9b5)" : "var(--chess-dark, #b58863)";
-      squaresSvg += `<rect x="${x}" y="${y}" width="${SQ}" height="${SQ}" fill="${fill}"/>`;
+      squaresSvg += `<rect data-square="${square}" x="${x}" y="${y}" width="${SQ}" height="${SQ}" fill="${fill}"/>`;
 
       const showRank = f === 0;
       const showFile = r === 7;
@@ -95,17 +117,21 @@ export function renderChessBoard(fen, options = {}) {
         }
       }
 
+      if (lastMove && (square === lastMove.from || square === lastMove.to)) {
+        highlightSvg += `<rect x="${x}" y="${y}" width="${SQ}" height="${SQ}" fill="var(--chess-highlight, rgba(255, 214, 0, .55))"/>`;
+      }
+
       // `board` is ordered as it appears in the FEN string: row 0 is rank 8.
       const piece = board[7 - rank][file];
       if (piece) {
-        piecesSvg += `<use href="#p-${piece}" x="${x}" y="${y}" width="${SQ}" height="${SQ}"/>`;
+        piecesSvg += `<use data-square="${square}" data-piece="${piece}" href="#p-${piece}" x="${x}" y="${y}" width="${SQ}" height="${SQ}"/>`;
       }
     }
   }
 
   const svg =
     `<svg viewBox="0 0 ${BOARD} ${BOARD}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schachstellung: ${fen.trim()}">` +
-    `<defs>${defs}</defs>${squaresSvg}${piecesSvg}</svg>`;
+    `<defs>${defs}</defs>${squaresSvg}${highlightSvg}${piecesSvg}</svg>`;
 
   const turnTitle = activeColor === "w" ? "White to move" : "Black to move";
   const turnIndicator =
