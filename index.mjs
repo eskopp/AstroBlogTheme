@@ -89,14 +89,16 @@ const CHESS_ENGINE_LABELS = {
   de: {
     load: "Engine laden",
     loading: "Lädt Engine…",
-    thinking: "Analysiere…",
+    stop: "Stoppen",
+    stopping: "Stoppt…",
     reanalyze: "Erneut analysieren",
     error: "Engine konnte nicht geladen werden.",
   },
   en: {
     load: "Load engine",
     loading: "Loading engine…",
-    thinking: "Analyzing…",
+    stop: "Stop",
+    stopping: "Stopping…",
     reanalyze: "Analyze again",
     error: "Could not load the engine.",
   },
@@ -127,8 +129,8 @@ function remarkChessPassthrough(config) {
           `<div class="chess-engine" hidden data-fen="${fen}">` +
           `<button type="button" class="chess-engine__toggle" ` +
           `data-label-load="${l.load}" data-label-loading="${l.loading}" ` +
-          `data-label-thinking="${l.thinking}" data-label-reanalyze="${l.reanalyze}" ` +
-          `data-label-error="${l.error}">${l.load}</button>` +
+          `data-label-stop="${l.stop}" data-label-stopping="${l.stopping}" ` +
+          `data-label-reanalyze="${l.reanalyze}" data-label-error="${l.error}">${l.load}</button>` +
           `<div class="chess-engine__lines" hidden></div>` +
           `</div>`;
       }
