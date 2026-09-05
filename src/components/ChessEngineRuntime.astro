@@ -1,0 +1,155 @@
+---
+---
+
+<script>
+  const nodes = [...document.querySelectorAll<HTMLElement>(".chess-engine")];
+  if (
+    nodes.length > 0 &&
+    typeof Worker !== "undefined" &&
+    typeof WebAssembly !== "undefined"
+  ) {
+    for (const node of nodes) node.hidden = false;
+
+    let worker: Worker | null = null;
+    let queue: Promise<void> = Promise.resolve();
+    let ChessCtor: any = null;
+
+    async function ensureEngine(): Promise<Worker> {
+      if (worker) return worker;
+      const w = new Worker("/stockfish/engine.js");
+      await new Promise<void>((resolve, reject) => {
+        const onMessage = (e: MessageEvent) => {
+          if (typeof e.data === "string" && e.data.includes("uciok")) {
+            w.removeEventListener("message", onMessage);
+            resolve();
+          }
+        };
+        w.addEventListener("message", onMessage);
+        w.addEventListener("error", () => reject(new Error("worker error")), {
+          once: true,
+        });
+        w.postMessage("uci");
+      });
+      w.postMessage("setoption name MultiPV value 3");
+      worker = w;
+      return w;
+    }
+
+    async function ensureChess() {
+      if (!ChessCtor) {
+        const mod = await import("chess.js");
+        ChessCtor = mod.Chess;
+      }
+      return ChessCtor;
+    }
+
+    /** UCI moves (e.g. "e2e4") -> a short SAN line, e.g. "1. e4 e5 2. Nf3". */
+    function formatLine(
+      fen: string,
+      uciMoves: string[],
+      Chess: any,
+      maxPlies = 8,
+    ): string {
+      const chess = new Chess(fen);
+      const parts: string[] = [];
+      let moveNo = parseInt(fen.split(/\s+/)[5] || "1", 10) || 1;
+      if (chess.turn() === "b") parts.push(`${moveNo}...`);
+      for (let i = 0; i < uciMoves.length && i < maxPlies; i++) {
+        const uci = uciMoves[i];
+        const whiteToMove = chess.turn() === "w";
+        const move = chess.move({
+          from: uci.slice(0, 2),
+          to: uci.slice(2, 4),
+          promotion: uci.slice(4) || undefined,
+        });
+        if (!move) break;
+        if (whiteToMove) {
+          parts.push(`${moveNo}.`, move.san);
+        } else {
+          parts.push(move.san);
+          moveNo++;
+        }
+      }
+      return parts.join(" ");
+    }
+
+    function analyze(node: HTMLElement) {
+      const fen = node.dataset.fen || "";
+      const toggle = node.querySelector<HTMLButtonElement>(
+        ".chess-engine__toggle",
+      );
+      const output = node.querySelector<HTMLElement>(".chess-engine__lines");
+      if (!toggle || !output) return;
+      const d = toggle.dataset;
+
+      toggle.disabled = true;
+      toggle.textContent = d.labelLoading ?? "…";
+      output.hidden = true;
+      output.innerHTML = "";
+
+      queue = queue.then(async () => {
+        try {
+          const [engine, Chess] = await Promise.all([
+            ensureEngine(),
+            ensureChess(),
+          ]);
+          toggle.textContent = d.labelThinking ?? "…";
+
+          const activeColor = fen.split(/\s+/)[1] === "b" ? "b" : "w";
+          const lines = new Map<number, string>();
+
+          await new Promise<void>((resolve) => {
+            const onMessage = (e: MessageEvent) => {
+              const line = typeof e.data === "string" ? e.data : "";
+              if (line.startsWith("info") && line.includes(" pv ")) {
+                const mpv = /multipv (\d+)/.exec(line);
+                const cp = /score cp (-?\d+)/.exec(line);
+                const mate = /score mate (-?\d+)/.exec(line);
+                const pv = /\bpv (.+)$/.exec(line);
+                if (mpv && pv) {
+                  let evalStr = "";
+                  if (mate) {
+                    const n = parseInt(mate[1], 10) * (activeColor === "b" ? -1 : 1);
+                    evalStr = `#${n}`;
+                  } else if (cp) {
+                    const val = parseInt(cp[1], 10) * (activeColor === "b" ? -1 : 1);
+                    evalStr = (val > 0 ? "+" : "") + (val / 100).toFixed(2);
+                  }
+                  const san = formatLine(fen, pv[1].trim().split(/\s+/), Chess);
+                  lines.set(parseInt(mpv[1], 10), `${evalStr}  ${san}`);
+                }
+              } else if (line.startsWith("bestmove")) {
+                engine.removeEventListener("message", onMessage);
+                resolve();
+              }
+            };
+            engine.addEventListener("message", onMessage);
+            engine.postMessage(`position fen ${fen}`);
+            engine.postMessage("go depth 14");
+          });
+
+          output.innerHTML =
+            `<p class="chess-engine__credit">` +
+            `<a href="https://stockfishchess.org/" target="_blank" rel="noopener">Stockfish</a> · GPLv3</p>` +
+            [...lines.entries()]
+              .sort((a, b) => a[0] - b[0])
+              .map(([, text]) => `<div class="chess-engine__line">${text}</div>`)
+              .join("");
+          output.hidden = false;
+          toggle.textContent = d.labelReanalyze ?? d.labelLoad ?? "";
+          toggle.disabled = false;
+        } catch (err) {
+          console.error("stockfish analysis failed:", err);
+          toggle.textContent = d.labelError ?? "Error";
+          toggle.disabled = false;
+        }
+      });
+    }
+
+    for (const node of nodes) {
+      node
+        .querySelector<HTMLButtonElement>(".chess-engine__toggle")
+        ?.addEventListener("click", () => analyze(node));
+    }
+  }
+</script>

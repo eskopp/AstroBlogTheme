@@ -51,8 +51,10 @@ export interface BlogThemeOptions {
   mermaid?: boolean;
   /** Render $...$ / $$...$$ math (and \ce{} chemistry) at build time with KaTeX. Requires remark-math, rehype-katex, katex in the consumer. Default `false`. */
   math?: boolean;
-  /** Render ```fen code blocks (a FEN string) as a static inline SVG chessboard at build time. No client-side JS. Add `black` after the language to flip the board. Default `false`. */
+  /** Render ```fen code blocks (a FEN string) as a static inline SVG chessboard at build time. No client-side JS. The board orients to put the side to move at the bottom; add `white` or `black` after the language to pin it instead. Default `false`. */
   chess?: boolean;
+  /** Add an opt-in "Load engine" button under each chess board that runs Stockfish (WASM, single-threaded) in a Web Worker to show an evaluation and the top lines. Only takes effect together with `chess: true`. Requires `stockfish` and `chess.js` installed in the consumer. The button (and all engine code) only appears once client-side JS has run — with JS disabled, nothing is shown. Default `false`. */
+  chessEngine?: boolean;
   /** Default colour scheme before the visitor picks one: "system" (default), "light" or "dark". */
   colorScheme?: "system" | "light" | "dark";
   /** Inject `/blog`, `/blog/[...slug]`, `/rss.xml` and `/404`. Default `true`. */

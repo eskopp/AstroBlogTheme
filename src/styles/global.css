@@ -309,6 +309,69 @@ pre code {
   }
 }
 
+.chess-engine[hidden] {
+  display: none;
+}
+
+.chess-engine {
+  margin-top: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.chess-engine__toggle {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.chess-engine__toggle:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.chess-engine__toggle:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.chess-engine__lines[hidden] {
+  display: none;
+}
+
+.chess-engine__lines {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius);
+  background: var(--code-bg);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+.chess-engine__line {
+  overflow-wrap: anywhere;
+}
+
+.chess-engine__credit {
+  margin: 0 0 0.2rem;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.chess-engine__credit a {
+  color: inherit;
+}
+
 /* line numbers */
 .astro-code code {
   counter-reset: line;

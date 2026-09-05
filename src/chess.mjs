@@ -47,12 +47,21 @@ const FILES = "abcdefgh";
  * Renders a chess position (FEN piece-placement field, or a full FEN string)
  * to a self-contained inline SVG string. Pure and build-time only — no
  * client-side JS or network requests.
+ *
+ * By default the board is oriented so the side to move sits at the bottom
+ * (from the FEN's active-color field); pass `orientation: "white"` or
+ * `"black"` to pin it instead.
  */
 export function renderChessBoard(fen, options = {}) {
-  const orientation = options.orientation === "black" ? "black" : "white";
   const fields = fen.trim().split(/\s+/);
   const placement = fields[0];
   const activeColor = fields[1] === "b" ? "b" : "w";
+  const orientation =
+    options.orientation === "white" || options.orientation === "black"
+      ? options.orientation
+      : activeColor === "b"
+        ? "black"
+        : "white";
   const board = parsePlacement(placement);
 
   const usedPieces = new Set();

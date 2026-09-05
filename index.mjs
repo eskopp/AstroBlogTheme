@@ -22,12 +22,17 @@ const CALLOUT_LABELS = {
   },
 };
 
+/** Locale of a content file from its name (`de.md` -> `"de"`), falling back to the default. */
+function localeFromFile(file, config) {
+  const seg = (file.path || "").split("/").pop() || "";
+  const loc = seg.replace(/\.(md|mdx)$/, "");
+  return config.locales.includes(loc) ? loc : config.defaultLocale;
+}
+
 /** GitHub-style callouts: a blockquote starting with `[!TYPE]` becomes <aside class="callout callout--type">. */
 function remarkCallouts(config) {
   return (tree, file) => {
-    const seg = (file.path || "").split("/").pop() || "";
-    const loc = seg.replace(/\.(md|mdx)$/, "");
-    const locale = config.locales.includes(loc) ? loc : config.defaultLocale;
+    const locale = localeFromFile(file, config);
     const labels = { ...(CALLOUT_LABELS.en), ...(CALLOUT_LABELS[locale] || {}) };
 
     visit(tree, "blockquote", (node) => {
@@ -80,22 +85,57 @@ function remarkMermaidPassthrough() {
   };
 }
 
+const CHESS_ENGINE_LABELS = {
+  de: {
+    load: "Engine laden",
+    loading: "Lädt Engine…",
+    thinking: "Analysiere…",
+    reanalyze: "Erneut analysieren",
+    error: "Engine konnte nicht geladen werden.",
+  },
+  en: {
+    load: "Load engine",
+    loading: "Loading engine…",
+    thinking: "Analyzing…",
+    reanalyze: "Analyze again",
+    error: "Could not load the engine.",
+  },
+};
+
 /** Turn ```fen fenced blocks into a static inline SVG chessboard at build time. */
-function remarkChessPassthrough() {
+function remarkChessPassthrough(config) {
   return (tree, file) => {
     visit(tree, "code", (node, index, parent) => {
       if (node.lang !== "fen" || !parent || index === undefined) return;
-      const orientation = (node.meta || "").trim() === "black" ? "black" : "white";
-      let svg;
+      // No meta: the side to move sits at the bottom. `white`/`black` pins it.
+      const meta = (node.meta || "").trim();
+      const orientation = meta === "white" || meta === "black" ? meta : undefined;
+      let board;
       try {
-        svg = renderChessBoard(node.value, { orientation });
+        board = renderChessBoard(node.value, { orientation });
       } catch (err) {
         const seg = (file.path || "").split("/").pop() || "unknown";
         throw new Error(`${seg}: invalid \`\`\`fen block: ${err.message}`);
       }
+
+      let engine = "";
+      if (config.chessEngine) {
+        const locale = localeFromFile(file, config);
+        const l = { ...CHESS_ENGINE_LABELS.en, ...(CHESS_ENGINE_LABELS[locale] || {}) };
+        const fen = node.value.trim().replace(/"/g, "&quot;");
+        engine =
+          `<div class="chess-engine" hidden data-fen="${fen}">` +
+          `<button type="button" class="chess-engine__toggle" ` +
+          `data-label-load="${l.load}" data-label-loading="${l.loading}" ` +
+          `data-label-thinking="${l.thinking}" data-label-reanalyze="${l.reanalyze}" ` +
+          `data-label-error="${l.error}">${l.load}</button>` +
+          `<div class="chess-engine__lines" hidden></div>` +
+          `</div>`;
+      }
+
       parent.children[index] = {
         type: "html",
-        value: `<div class="chess-board">${svg}</div>`,
+        value: `<div class="chess-board">${board}${engine}</div>`,
       };
     });
   };
@@ -126,6 +166,7 @@ const DEFAULTS = {
   mermaid: false,
   math: false,
   chess: false,
+  chessEngine: false,
   colorScheme: "system",
 };
 
@@ -147,6 +188,7 @@ function resolveConfig(options) {
     mermaid: options.mermaid ?? DEFAULTS.mermaid,
     math: options.math ?? DEFAULTS.math,
     chess: options.chess ?? DEFAULTS.chess,
+    chessEngine: (options.chess ?? DEFAULTS.chess) && (options.chessEngine ?? DEFAULTS.chessEngine),
     colorScheme: options.colorScheme ?? DEFAULTS.colorScheme,
     postList: options.postList === "rows" ? "rows" : DEFAULTS.postList,
   };
@@ -190,7 +232,7 @@ export default function blogTheme(options = {}) {
         const remarkPlugins = [[remarkCallouts, config]];
         const mathRehype = [];
         if (config.mermaid) remarkPlugins.push(remarkMermaidPassthrough);
-        if (config.chess) remarkPlugins.push(remarkChessPassthrough);
+        if (config.chess) remarkPlugins.push([remarkChessPassthrough, config]);
         if (config.math) {
           try {
             await import("katex/contrib/mhchem"); // registers \ce{} for chemistry
@@ -264,6 +306,16 @@ export default function blogTheme(options = {}) {
             injectRoute({
               pattern: "/search.json",
               entrypoint: at("search.json.ts"),
+            });
+          }
+          if (config.chessEngine) {
+            injectRoute({
+              pattern: "/stockfish/engine.js",
+              entrypoint: at("stockfish-engine.js.ts"),
+            });
+            injectRoute({
+              pattern: "/stockfish/engine.wasm",
+              entrypoint: at("stockfish-engine.wasm.ts"),
             });
           }
           // 404 + 500 emit flat .html; 403/503/429 emit <code>/index.html
