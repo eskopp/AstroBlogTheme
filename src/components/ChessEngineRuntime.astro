@@ -28,6 +28,8 @@
     root: MoveNode;
     currentNode: MoveNode;
     nodesById: Map<number, MoveNode>;
+    /** Tap-to-move: the square lifted by a first tap, awaiting a destination tap. */
+    selected: string | null;
   }
 
   let nextNodeId = 1;
@@ -126,6 +128,7 @@
     }
 
     function renderBoard(ctx: Ctx) {
+      ctx.selected = null;
       const old = ctx.board.querySelector(".chess-board__frame");
       if (!old) return;
       old.outerHTML = renderChessBoard(ctx.fen, {
@@ -133,6 +136,40 @@
         lastMove: ctx.lastMove,
       });
       attachPieceHandlers(ctx);
+    }
+
+    function sideToMove(fen: string): "w" | "b" {
+      return fen.split(/\s+/)[1] === "b" ? "b" : "w";
+    }
+
+    function renderSelection(ctx: Ctx) {
+      const svg = ctx.board.querySelector<SVGSVGElement>(
+        ".chess-board__frame svg",
+      );
+      if (!svg) return;
+      svg.querySelectorAll(".chess-board__selected").forEach((el) => el.remove());
+      if (!ctx.selected) return;
+      const { x, y } = squareToXY(ctx.selected, ctx.orientation);
+      const rect = document.createElementNS(svg.namespaceURI, "rect");
+      rect.setAttribute("class", "chess-board__selected");
+      rect.setAttribute("x", String(x));
+      rect.setAttribute("y", String(y));
+      rect.setAttribute("width", String(SQ));
+      rect.setAttribute("height", String(SQ));
+      rect.setAttribute("fill", "var(--chess-selected, rgba(60, 140, 255, .45))");
+      const firstPiece = svg.querySelector("use[data-square]");
+      if (firstPiece) svg.insertBefore(rect, firstPiece);
+      else svg.appendChild(rect);
+    }
+
+    function selectSquare(ctx: Ctx, square: string) {
+      ctx.selected = square;
+      renderSelection(ctx);
+    }
+
+    function clearSelection(ctx: Ctx) {
+      ctx.selected = null;
+      renderSelection(ctx);
     }
 
     function escHtml(s: string) {
@@ -350,40 +387,82 @@
       }
     }
 
-    function onPointerDown(
+    // Below this distance (SVG units, board is 360x360) a press+release counts
+    // as a tap (lift/place) rather than a drag - needed for touch, where a
+    // dragged piece sits under the finger and hides the target square.
+    const DRAG_THRESHOLD = 10;
+
+    function onSquarePointerDown(
       e: PointerEvent,
       ctx: Ctx,
       svg: SVGSVGElement,
-      pieceEl: SVGUseElement,
+      square: string,
+      pieceEl: SVGUseElement | null,
     ) {
       if (e.button !== 0) return;
       e.preventDefault();
-      const fromSquare = pieceEl.dataset.square!;
+      const pendingSelection = ctx.selected;
       const start0 = svgPoint(svg, e);
       if (!start0) return;
-      const baseX = parseFloat(pieceEl.getAttribute("x") || "0");
-      const baseY = parseFloat(pieceEl.getAttribute("y") || "0");
-      const dx = start0.x - baseX;
-      const dy = start0.y - baseY;
-      svg.appendChild(pieceEl);
-      pieceEl.classList.add("is-dragging");
+      let dragging = false;
+      let baseX = 0;
+      let baseY = 0;
+      let dx = 0;
+      let dy = 0;
+      if (pieceEl) {
+        baseX = parseFloat(pieceEl.getAttribute("x") || "0");
+        baseY = parseFloat(pieceEl.getAttribute("y") || "0");
+        dx = start0.x - baseX;
+        dy = start0.y - baseY;
+      }
 
       function onMove(ev: PointerEvent) {
         const p = svgPoint(svg, ev);
         if (!p) return;
-        pieceEl.setAttribute("x", String(p.x - dx));
-        pieceEl.setAttribute("y", String(p.y - dy));
+        if (!dragging && pieceEl) {
+          const moved = Math.hypot(p.x - start0!.x, p.y - start0!.y);
+          if (moved > DRAG_THRESHOLD) {
+            dragging = true;
+            if (ctx.selected) clearSelection(ctx);
+            svg.appendChild(pieceEl);
+            pieceEl.classList.add("is-dragging");
+          }
+        }
+        if (dragging && pieceEl) {
+          pieceEl.setAttribute("x", String(p.x - dx));
+          pieceEl.setAttribute("y", String(p.y - dy));
+        }
       }
 
       function onUp(ev: PointerEvent) {
         window.removeEventListener("pointermove", onMove);
         window.removeEventListener("pointerup", onUp);
-        const p = svgPoint(svg, ev);
-        const half = 22.5;
-        const toSquare = p
-          ? xyToSquare(p.x - dx + half, p.y - dy + half, ctx.orientation)
-          : null;
-        handleMove(ctx, fromSquare, toSquare);
+
+        if (dragging && pieceEl) {
+          const p = svgPoint(svg, ev);
+          const half = 22.5;
+          const toSquare = p
+            ? xyToSquare(p.x - dx + half, p.y - dy + half, ctx.orientation)
+            : null;
+          handleMove(ctx, square, toSquare);
+          return;
+        }
+
+        // A tap, not a drag.
+        if (pendingSelection && pendingSelection === square) {
+          clearSelection(ctx);
+        } else if (pendingSelection) {
+          const ownPieceOfSideToMove =
+            pieceEl && pieceEl.dataset.piece?.[0] === sideToMove(ctx.fen);
+          clearSelection(ctx);
+          if (ownPieceOfSideToMove) {
+            selectSquare(ctx, square);
+          } else {
+            handleMove(ctx, pendingSelection, square);
+          }
+        } else if (pieceEl && pieceEl.dataset.piece?.[0] === sideToMove(ctx.fen)) {
+          selectSquare(ctx, square);
+        }
       }
 
       window.addEventListener("pointermove", onMove);
@@ -395,11 +474,20 @@
         ".chess-board__frame svg",
       );
       if (!svg) return;
+      for (const rect of svg.querySelectorAll<SVGRectElement>(
+        "rect[data-square]",
+      )) {
+        const square = rect.dataset.square!;
+        rect.addEventListener("pointerdown", (e) =>
+          onSquarePointerDown(e, ctx, svg, square, null),
+        );
+      }
       for (const piece of svg.querySelectorAll<SVGUseElement>(
         "use[data-square]",
       )) {
+        const square = piece.dataset.square!;
         piece.addEventListener("pointerdown", (e) =>
-          onPointerDown(e, ctx, svg, piece),
+          onSquarePointerDown(e, ctx, svg, square, piece),
         );
       }
     }
