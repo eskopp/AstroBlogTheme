@@ -50,7 +50,9 @@ const FILES = "abcdefgh";
  */
 export function renderChessBoard(fen, options = {}) {
   const orientation = options.orientation === "black" ? "black" : "white";
-  const placement = fen.trim().split(/\s+/)[0];
+  const fields = fen.trim().split(/\s+/);
+  const placement = fields[0];
+  const activeColor = fields[1] === "b" ? "b" : "w";
   const board = parsePlacement(placement);
 
   const usedPieces = new Set();
@@ -92,8 +94,20 @@ export function renderChessBoard(fen, options = {}) {
     }
   }
 
-  return (
+  const svg =
     `<svg viewBox="0 0 ${BOARD} ${BOARD}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schachstellung: ${fen.trim()}">` +
-    `<defs>${defs}</defs>${squaresSvg}${piecesSvg}</svg>`
+    `<defs>${defs}</defs>${squaresSvg}${piecesSvg}</svg>`;
+
+  const turnTitle = activeColor === "w" ? "White to move" : "Black to move";
+  const turnIndicator =
+    `<span class="chess-board__turn" data-color="${activeColor}" role="img" aria-label="${turnTitle}" title="${turnTitle}"></span>`;
+
+  const lichessUrl = `https://lichess.org/analysis/${fields.join("_")}`;
+  const lichessLink =
+    `<a class="chess-board__lichess" href="${lichessUrl}" target="_blank" rel="noopener noreferrer">Open in Lichess</a>`;
+
+  return (
+    `<div class="chess-board__frame">${svg}` +
+    `<div class="chess-board__panel">${turnIndicator}${lichessLink}</div></div>`
   );
 }
