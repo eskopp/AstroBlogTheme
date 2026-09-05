@@ -319,8 +319,70 @@ pre code {
   }
 }
 
+.chess-controls[hidden],
 .chess-engine[hidden] {
   display: none;
+}
+
+.chess-controls {
+  margin-top: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.chess-controls__reset {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.chess-controls__reset:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.chess-controls__reset:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.chess-controls__moves {
+  width: 100%;
+  min-height: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.15rem 0.4rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius);
+  background: var(--code-bg);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+.chess-moves__no {
+  color: var(--text-muted);
+}
+
+.chess-moves__move {
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 0 0.2rem;
+}
+
+.chess-moves__move:hover {
+  background: var(--border);
+}
+
+.chess-moves__move.is-active {
+  background: var(--accent);
+  color: var(--accent-contrast);
 }
 
 .chess-engine {

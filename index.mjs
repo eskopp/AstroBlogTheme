@@ -93,6 +93,7 @@ const CHESS_ENGINE_LABELS = {
     stopping: "Stoppt…",
     reanalyze: "Erneut analysieren",
     error: "Engine konnte nicht geladen werden.",
+    reset: "Zurück zur Grundstellung",
   },
   en: {
     load: "Load engine",
@@ -101,6 +102,7 @@ const CHESS_ENGINE_LABELS = {
     stopping: "Stopping…",
     reanalyze: "Analyze again",
     error: "Could not load the engine.",
+    reset: "Back to starting position",
   },
 };
 
@@ -126,6 +128,7 @@ function remarkChessPassthrough(config) {
         orientation ?? (fenFields[1] === "b" ? "black" : "white");
 
       let engine = "";
+      let controls = "";
       if (config.chessEngine) {
         const locale = localeFromFile(file, config);
         const l = { ...CHESS_ENGINE_LABELS.en, ...(CHESS_ENGINE_LABELS[locale] || {}) };
@@ -137,13 +140,18 @@ function remarkChessPassthrough(config) {
           `data-label-reanalyze="${l.reanalyze}" data-label-error="${l.error}">${l.load}</button>` +
           `<div class="chess-engine__lines" hidden></div>` +
           `</div>`;
+        controls =
+          `<div class="chess-controls" hidden>` +
+          `<button type="button" class="chess-controls__reset" disabled>${l.reset}</button>` +
+          `<div class="chess-controls__moves"></div>` +
+          `</div>`;
       }
 
       parent.children[index] = {
         type: "html",
         value:
           `<div class="chess-board" data-fen="${fen}" data-orientation="${resolvedOrientation}">` +
-          `${board}${engine}</div>`,
+          `${board}${controls}${engine}</div>`,
       };
     });
   };

@@ -4,13 +4,26 @@
 <script>
   import { renderChessBoard, xyToSquare } from "../chess.mjs";
 
+  interface HistEntry {
+    san: string;
+    fen: string;
+    lastMove: { from: string; to: string };
+  }
+
   interface Ctx {
     board: HTMLElement;
     engineNode: HTMLElement | null;
+    controlsNode: HTMLElement | null;
     orientation: "white" | "black";
+    initialFen: string;
+    startColor: "w" | "b";
+    startFullmove: number;
     fen: string;
     lastMove: { from: string; to: string } | null;
     chess: any;
+    history: HistEntry[];
+    /** Index into `history` for the currently shown position; -1 = initial position. */
+    cursor: number;
   }
 
   const boards = [...document.querySelectorAll<HTMLElement>(".chess-board")];
@@ -116,6 +129,64 @@
       attachPieceHandlers(ctx);
     }
 
+    function escHtml(s: string) {
+      return s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+    }
+
+    /** Append a played move at the current cursor, discarding any redone future. */
+    function pushMove(ctx: Ctx, move: any) {
+      ctx.history = ctx.history.slice(0, ctx.cursor + 1);
+      ctx.history.push({
+        san: move.san,
+        fen: ctx.chess.fen(),
+        lastMove: { from: move.from, to: move.to },
+      });
+      ctx.cursor = ctx.history.length - 1;
+      ctx.fen = ctx.chess.fen();
+      ctx.lastMove = { from: move.from, to: move.to };
+    }
+
+    function renderMoveList(ctx: Ctx) {
+      const container = ctx.controlsNode?.querySelector<HTMLElement>(
+        ".chess-controls__moves",
+      );
+      const resetBtn = ctx.controlsNode?.querySelector<HTMLButtonElement>(
+        ".chess-controls__reset",
+      );
+      if (resetBtn) resetBtn.disabled = ctx.cursor === -1 && ctx.history.length === 0;
+      if (!container) return;
+
+      let html = "";
+      let moveNo = ctx.startFullmove;
+      let turn = ctx.startColor;
+      if (turn === "b" && ctx.history.length > 0) {
+        html += `<span class="chess-moves__no">${moveNo}...</span>`;
+      }
+      for (let i = 0; i < ctx.history.length; i++) {
+        if (turn === "w") html += `<span class="chess-moves__no">${moveNo}.</span>`;
+        const active = i === ctx.cursor ? " is-active" : "";
+        html += `<span class="chess-moves__move${active}" data-idx="${i}">${escHtml(ctx.history[i].san)}</span>`;
+        if (turn === "b") moveNo++;
+        turn = turn === "w" ? "b" : "w";
+      }
+      container.innerHTML = html;
+      container.querySelectorAll<HTMLElement>(".chess-moves__move").forEach((el, i) => {
+        el.addEventListener("click", () => gotoHistory(ctx, i));
+      });
+    }
+
+    async function gotoHistory(ctx: Ctx, index: number) {
+      if (active?.ctx === ctx) await active.stop();
+      const Chess = await ensureChess();
+      const fen = index === -1 ? ctx.initialFen : ctx.history[index].fen;
+      ctx.cursor = index;
+      ctx.fen = fen;
+      ctx.chess = new Chess(fen);
+      ctx.lastMove = index === -1 ? null : ctx.history[index].lastMove;
+      renderBoard(ctx);
+      renderMoveList(ctx);
+    }
+
     function svgPoint(svg: SVGSVGElement, evt: PointerEvent) {
       const pt = svg.createSVGPoint();
       pt.x = evt.clientX;
@@ -143,9 +214,9 @@
         renderBoard(ctx);
         return;
       }
-      ctx.fen = ctx.chess.fen();
-      ctx.lastMove = { from: move.from, to: move.to };
+      pushMove(ctx, move);
       renderBoard(ctx);
+      renderMoveList(ctx);
 
       if (active?.ctx === ctx) {
         await active.stop();
@@ -207,19 +278,17 @@
       }
     }
 
-    async function applyLineToBoard(
-      ctx: Ctx,
-      baseFen: string,
-      uciMoves: string[],
-    ) {
+    async function applyLineToBoard(ctx: Ctx, uciMoves: string[]) {
+      if (active?.ctx === ctx) await active.stop();
       const Chess = await ensureChess();
-      const chess = new Chess(baseFen);
-      let last: any = null;
+      // Engine analysis only runs on the current position, so ctx.chess already
+      // reflects the line's base position (nothing else can mutate it meanwhile).
+      if (!ctx.chess) ctx.chess = new Chess(ctx.fen);
       for (let i = 0; i < uciMoves.length && i < MAX_PLIES; i++) {
         const uci = uciMoves[i];
         let move: any = null;
         try {
-          move = chess.move({
+          move = ctx.chess.move({
             from: uci.slice(0, 2),
             to: uci.slice(2, 4),
             promotion: uci.slice(4) || undefined,
@@ -228,20 +297,16 @@
           break;
         }
         if (!move) break;
-        last = move;
+        pushMove(ctx, move);
       }
-      if (active?.ctx === ctx) await active.stop();
-      ctx.chess = chess;
-      ctx.fen = chess.fen();
-      ctx.lastMove = last ? { from: last.from, to: last.to } : null;
       renderBoard(ctx);
+      renderMoveList(ctx);
     }
 
     function renderLines(
       output: HTMLElement,
       lines: Map<number, { text: string; moves: string[] }>,
       ctx: Ctx,
-      searchFen: string,
     ) {
       const sorted = [...lines.entries()].sort((a, b) => a[0] - b[0]);
       output.innerHTML =
@@ -255,7 +320,7 @@
         .querySelectorAll<HTMLElement>(".chess-engine__line")
         .forEach((el, i) => {
           el.addEventListener("click", () =>
-            applyLineToBoard(ctx, searchFen, sorted[i][1].moves),
+            applyLineToBoard(ctx, sorted[i][1].moves),
           );
         });
     }
@@ -303,7 +368,7 @@
                 const moves = pv[1].trim().split(/\s+/);
                 const san = formatLine(searchFen, moves, Chess);
                 lines.set(parseInt(mpv[1], 10), { text: `${evalStr}  ${san}`, moves });
-                renderLines(output, lines, ctx, searchFen);
+                renderLines(output, lines, ctx);
               }
             } else if (line.startsWith("bestmove")) {
               engine.removeEventListener("message", onMessage);
@@ -341,14 +406,25 @@
 
     for (const board of boards) {
       const engineNode = board.querySelector<HTMLElement>(".chess-engine");
+      const controlsNode = board.querySelector<HTMLElement>(".chess-controls");
       if (engineNode) engineNode.hidden = false;
+      if (controlsNode) controlsNode.hidden = false;
+
+      const initialFen = board.dataset.fen || "";
+      const startFields = initialFen.split(/\s+/);
       const ctx: Ctx = {
         board,
         engineNode,
+        controlsNode,
         orientation: board.dataset.orientation === "black" ? "black" : "white",
-        fen: board.dataset.fen || "",
+        initialFen,
+        startColor: startFields[1] === "b" ? "b" : "w",
+        startFullmove: parseInt(startFields[5] || "1", 10) || 1,
+        fen: initialFen,
         lastMove: null,
         chess: null,
+        history: [],
+        cursor: -1,
       };
       attachPieceHandlers(ctx);
       engineNode
@@ -360,6 +436,9 @@
             start(ctx);
           }
         });
+      controlsNode
+        ?.querySelector<HTMLButtonElement>(".chess-controls__reset")
+        ?.addEventListener("click", () => gotoHistory(ctx, -1));
     }
   }
 </script>
