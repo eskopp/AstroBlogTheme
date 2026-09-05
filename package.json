@@ -1,6 +1,6 @@
 {
   "name": "astro-blog-theme",
-  "version": "0.2.43",
+  "version": "0.2.44",
   "type": "module",
   "description": "A reusable Astro blog theme, importable straight from GitHub like a Hugo module.",
   "author": "Erik Skopp",

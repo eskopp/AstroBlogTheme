@@ -136,8 +136,33 @@
       old.outerHTML = renderChessBoard(ctx.fen, {
         orientation: ctx.orientation,
         lastMove: ctx.lastMove,
+        evalBar: true,
       });
       attachPieceHandlers(ctx);
+    }
+
+    /** Updates the eval bar with a White-relative score (only ever from the best line). */
+    function updateEvalBar(ctx: Ctx, score: { cp?: number; mate?: number }) {
+      const fill = ctx.board.querySelector<HTMLElement>(
+        ".chess-board__evalbar-fill",
+      );
+      const label = ctx.board.querySelector<HTMLElement>(
+        ".chess-board__evalbar-label",
+      );
+      if (!fill) return;
+      let pct: number;
+      let text: string;
+      if (score.mate !== undefined) {
+        pct = score.mate > 0 ? 100 : 0;
+        text = `#${Math.abs(score.mate)}`;
+      } else {
+        const cp = score.cp ?? 0;
+        pct = 50 + 50 * Math.tanh(cp / 400);
+        pct = Math.max(2, Math.min(98, pct));
+        text = (cp > 0 ? "+" : "") + (cp / 100).toFixed(1);
+      }
+      fill.style.height = `${pct}%`;
+      if (label) label.textContent = text;
     }
 
     function sideToMove(fen: string): "w" | "b" {
@@ -796,12 +821,17 @@
               const pv = /\bpv (.+)$/.exec(line);
               if (mpv && pv) {
                 let evalStr = "";
+                // cp/mate here are already White-relative: the engine's own
+                // score is mover-relative, and this flips it when Black is
+                // to move, so both the line text and the eval bar can use it as-is.
                 if (mate) {
                   const n = parseInt(mate[1], 10) * (activeColor === "b" ? -1 : 1);
                   evalStr = `#${n}`;
+                  if (mpv[1] === "1") updateEvalBar(ctx, { mate: n });
                 } else if (cp) {
                   const val = parseInt(cp[1], 10) * (activeColor === "b" ? -1 : 1);
                   evalStr = (val > 0 ? "+" : "") + (val / 100).toFixed(2);
+                  if (mpv[1] === "1") updateEvalBar(ctx, { cp: val });
                 }
                 const moves = pv[1].trim().split(/\s+/);
                 const san = formatLine(searchFen, moves, Chess);

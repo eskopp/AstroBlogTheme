@@ -270,6 +270,44 @@ pre code {
   pointer-events: none;
 }
 
+.chess-board__evalbar-wrap {
+  flex: none;
+  align-self: stretch;
+  width: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.chess-board__evalbar {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 0.9rem;
+  background: #111;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.chess-board__evalbar-fill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 50%;
+  background: #eee;
+  transition: height 0.4s ease;
+}
+
+.chess-board__evalbar-label {
+  flex: none;
+  text-align: center;
+  font-size: 0.55rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
 .chess-board__promotion rect {
   cursor: pointer;
 }
@@ -332,6 +370,10 @@ pre code {
   .chess-board__panel {
     flex-direction: row;
     width: auto;
+  }
+
+  .chess-board__evalbar-wrap {
+    display: none;
   }
 }
 

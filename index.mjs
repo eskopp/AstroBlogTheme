@@ -130,7 +130,7 @@ function remarkChessPassthrough(config) {
       const orientation = meta === "white" || meta === "black" ? meta : undefined;
       let board;
       try {
-        board = renderChessBoard(node.value, { orientation });
+        board = renderChessBoard(node.value, { orientation, evalBar: config.chessEngine });
       } catch (err) {
         const seg = (file.path || "").split("/").pop() || "unknown";
         throw new Error(`${seg}: invalid \`\`\`fen block: ${err.message}`);
