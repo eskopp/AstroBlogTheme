@@ -143,8 +143,9 @@ export function renderChessBoard(fen, options = {}) {
     `<span class="chess-board__turn" data-color="${activeColor}" role="img" aria-label="${turnTitle}" title="${turnTitle}"></span>`;
 
   const lichessUrl = `https://lichess.org/analysis/${fields.join("_")}`;
+  const lichessLabel = options.lichessLabel || "Open in Lichess";
   const lichessLink =
-    `<a class="chess-board__lichess" href="${lichessUrl}" target="_blank" rel="noopener noreferrer">Open in Lichess</a>`;
+    `<a class="chess-board__lichess" href="${lichessUrl}" target="_blank" rel="noopener noreferrer">${lichessLabel}</a>`;
 
   const evalBar = options.evalBar
     ? `<div class="chess-board__evalbar-wrap" hidden>` +

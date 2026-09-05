@@ -356,13 +356,14 @@ pre code {
   font-weight: 600;
   padding: 0.35rem 0.5rem;
   border-radius: var(--radius);
-  background: var(--accent);
-  color: var(--accent-contrast);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
   text-decoration: none;
 }
 
 .chess-board__lichess:hover {
-  opacity: 0.85;
+  border-color: var(--accent);
 }
 
 @media (max-width: 480px) {

@@ -94,6 +94,7 @@ const CHESS_ENGINE_LABELS = {
     reanalyze: "Erneut analysieren",
     error: "Engine konnte nicht geladen werden.",
     reset: "Zurück zur Grundstellung",
+    openInLichess: "In Lichess öffnen",
     copy: "Kopieren",
     copied: "Kopiert!",
     check: "Schach!",
@@ -117,6 +118,7 @@ const CHESS_ENGINE_LABELS = {
     checkmateBlack: "Checkmate – Black wins",
     stalemate: "Stalemate – draw",
     draw: "Draw",
+    openInLichess: "Open in Lichess",
   },
 };
 
@@ -128,9 +130,16 @@ function remarkChessPassthrough(config) {
       // No meta: the side to move sits at the bottom. `white`/`black` pins it.
       const meta = (node.meta || "").trim();
       const orientation = meta === "white" || meta === "black" ? meta : undefined;
+      const locale = localeFromFile(file, config);
+      const l = { ...CHESS_ENGINE_LABELS.en, ...(CHESS_ENGINE_LABELS[locale] || {}) };
+
       let board;
       try {
-        board = renderChessBoard(node.value, { orientation, evalBar: config.chessEngine });
+        board = renderChessBoard(node.value, {
+          orientation,
+          evalBar: config.chessEngine,
+          lichessLabel: l.openInLichess,
+        });
       } catch (err) {
         const seg = (file.path || "").split("/").pop() || "unknown";
         throw new Error(`${seg}: invalid \`\`\`fen block: ${err.message}`);
@@ -144,8 +153,6 @@ function remarkChessPassthrough(config) {
       let engine = "";
       let controls = "";
       if (config.chessEngine) {
-        const locale = localeFromFile(file, config);
-        const l = { ...CHESS_ENGINE_LABELS.en, ...(CHESS_ENGINE_LABELS[locale] || {}) };
         engine =
           `<div class="chess-engine" hidden>` +
           `<button type="button" class="chess-engine__toggle" ` +
@@ -172,7 +179,8 @@ function remarkChessPassthrough(config) {
       parent.children[index] = {
         type: "html",
         value:
-          `<div class="chess-board" data-fen="${fen}" data-orientation="${resolvedOrientation}">` +
+          `<div class="chess-board" data-fen="${fen}" data-orientation="${resolvedOrientation}" ` +
+          `data-lichess-label="${l.openInLichess}">` +
           `${board}${controls}${engine}</div>`,
       };
     });

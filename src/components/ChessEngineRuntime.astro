@@ -22,6 +22,7 @@
     initialFen: string;
     startColor: "w" | "b";
     startFullmove: number;
+    lichessLabel: string;
     fen: string;
     lastMove: { from: string; to: string } | null;
     chess: any;
@@ -137,6 +138,7 @@
         orientation: ctx.orientation,
         lastMove: ctx.lastMove,
         evalBar: true,
+        lichessLabel: ctx.lichessLabel,
       });
       attachPieceHandlers(ctx);
     }
@@ -901,6 +903,7 @@
         initialFen,
         startColor: startFields[1] === "b" ? "b" : "w",
         startFullmove: parseInt(startFields[5] || "1", 10) || 1,
+        lichessLabel: board.dataset.lichessLabel || "Open in Lichess",
         fen: initialFen,
         lastMove: null,
         chess: null,
