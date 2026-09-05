@@ -17,6 +17,11 @@ const PIECE_PATHS = {
   bP: '<path stroke="#000" stroke-linecap="round" stroke-width="1.5" d="M22.5 9a4 4 0 0 0-3.22 6.38 6.48 6.48 0 0 0-.87 10.65c-3 1.06-7.41 5.55-7.41 13.47h23c0-7.92-4.41-12.41-7.41-13.47a6.46 6.46 0 0 0-.87-10.65A4.01 4.01 0 0 0 22.5 9z"/>',
 };
 
+/** Inner SVG markup for a piece code (e.g. "wQ"), for injecting symbols on demand client-side. */
+export function pieceMarkup(piece) {
+  return PIECE_PATHS[piece] || "";
+}
+
 function parsePlacement(placement) {
   const rows = placement.split("/");
   if (rows.length !== 8) {

@@ -220,6 +220,7 @@ pre code {
   --chess-dark: #b58863;
   --chess-highlight: rgba(255, 214, 0, 0.55);
   --chess-selected: rgba(60, 140, 255, 0.45);
+  --chess-check: rgba(220, 38, 38, 0.55);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -264,7 +265,16 @@ pre code {
 }
 
 .chess-board__arrow,
-.chess-board__selected {
+.chess-board__selected,
+.chess-board__check {
+  pointer-events: none;
+}
+
+.chess-board__promotion rect {
+  cursor: pointer;
+}
+
+.chess-board__promotion use {
   pointer-events: none;
 }
 
@@ -338,7 +348,20 @@ pre code {
   gap: 0.5rem;
 }
 
-.chess-controls__reset {
+.chess-controls__status {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.chess-controls__buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.chess-controls__reset,
+.chess-controls__copy {
   font-size: 0.78rem;
   font-weight: 600;
   padding: 0.4rem 0.75rem;
@@ -349,11 +372,13 @@ pre code {
   cursor: pointer;
 }
 
-.chess-controls__reset:hover:not(:disabled) {
+.chess-controls__reset:hover:not(:disabled),
+.chess-controls__copy:hover:not(:disabled) {
   border-color: var(--accent);
 }
 
-.chess-controls__reset:disabled {
+.chess-controls__reset:disabled,
+.chess-controls__copy:disabled {
   opacity: 0.5;
   cursor: default;
 }

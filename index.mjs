@@ -94,6 +94,13 @@ const CHESS_ENGINE_LABELS = {
     reanalyze: "Erneut analysieren",
     error: "Engine konnte nicht geladen werden.",
     reset: "Zurück zur Grundstellung",
+    copy: "Kopieren",
+    copied: "Kopiert!",
+    check: "Schach!",
+    checkmateWhite: "Schachmatt – Weiß gewinnt",
+    checkmateBlack: "Schachmatt – Schwarz gewinnt",
+    stalemate: "Patt – Remis",
+    draw: "Remis",
   },
   en: {
     load: "Load engine",
@@ -103,6 +110,13 @@ const CHESS_ENGINE_LABELS = {
     reanalyze: "Analyze again",
     error: "Could not load the engine.",
     reset: "Back to starting position",
+    copy: "Copy",
+    copied: "Copied!",
+    check: "Check!",
+    checkmateWhite: "Checkmate – White wins",
+    checkmateBlack: "Checkmate – Black wins",
+    stalemate: "Stalemate – draw",
+    draw: "Draw",
   },
 };
 
@@ -142,7 +156,15 @@ function remarkChessPassthrough(config) {
           `</div>`;
         controls =
           `<div class="chess-controls" hidden>` +
+          `<p class="chess-controls__status" hidden ` +
+          `data-check="${l.check}" data-checkmate-white="${l.checkmateWhite}" ` +
+          `data-checkmate-black="${l.checkmateBlack}" data-stalemate="${l.stalemate}" ` +
+          `data-draw="${l.draw}"></p>` +
+          `<div class="chess-controls__buttons">` +
           `<button type="button" class="chess-controls__reset" disabled>${l.reset}</button>` +
+          `<button type="button" class="chess-controls__copy" ` +
+          `data-label-copy="${l.copy}" data-label-copied="${l.copied}">${l.copy}</button>` +
+          `</div>` +
           `<div class="chess-controls__moves"></div>` +
           `</div>`;
       }
