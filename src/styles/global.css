@@ -214,6 +214,36 @@ pre code {
   display: inline-block;
 }
 
+/* chess boards */
+:root {
+  --chess-light: #f0d9b5;
+  --chess-dark: #b58863;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --chess-light: #cbb89d;
+    --chess-dark: #7a5c42;
+  }
+}
+
+:root[data-theme="dark"] {
+  --chess-light: #cbb89d;
+  --chess-dark: #7a5c42;
+}
+
+.prose .chess-board {
+  margin: 1.75rem auto;
+  max-width: 26rem;
+}
+
+.prose .chess-board svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 0.25rem;
+}
+
 /* line numbers */
 .astro-code code {
   counter-reset: line;

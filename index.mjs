@@ -1,6 +1,7 @@
 import sitemap from "@astrojs/sitemap";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import { visit } from "unist-util-visit";
+import { renderChessBoard } from "./src/chess.mjs";
 
 const CALLOUT_LABELS = {
   de: {
@@ -79,6 +80,27 @@ function remarkMermaidPassthrough() {
   };
 }
 
+/** Turn ```fen fenced blocks into a static inline SVG chessboard at build time. */
+function remarkChessPassthrough() {
+  return (tree, file) => {
+    visit(tree, "code", (node, index, parent) => {
+      if (node.lang !== "fen" || !parent || index === undefined) return;
+      const orientation = (node.meta || "").trim() === "black" ? "black" : "white";
+      let svg;
+      try {
+        svg = renderChessBoard(node.value, { orientation });
+      } catch (err) {
+        const seg = (file.path || "").split("/").pop() || "unknown";
+        throw new Error(`${seg}: invalid \`\`\`fen block: ${err.message}`);
+      }
+      parent.children[index] = {
+        type: "html",
+        value: `<div class="chess-board">${svg}</div>`,
+      };
+    });
+  };
+}
+
 const DEFAULTS = {
   title: "Astro Blog Theme",
   description: "A blog built with Astro.",
@@ -103,6 +125,7 @@ const DEFAULTS = {
   toc: true,
   mermaid: false,
   math: false,
+  chess: false,
   colorScheme: "system",
 };
 
@@ -123,6 +146,7 @@ function resolveConfig(options) {
     toc: options.toc ?? DEFAULTS.toc,
     mermaid: options.mermaid ?? DEFAULTS.mermaid,
     math: options.math ?? DEFAULTS.math,
+    chess: options.chess ?? DEFAULTS.chess,
     colorScheme: options.colorScheme ?? DEFAULTS.colorScheme,
     postList: options.postList === "rows" ? "rows" : DEFAULTS.postList,
   };
@@ -166,6 +190,7 @@ export default function blogTheme(options = {}) {
         const remarkPlugins = [[remarkCallouts, config]];
         const mathRehype = [];
         if (config.mermaid) remarkPlugins.push(remarkMermaidPassthrough);
+        if (config.chess) remarkPlugins.push(remarkChessPassthrough);
         if (config.math) {
           try {
             await import("katex/contrib/mhchem"); // registers \ce{} for chemistry

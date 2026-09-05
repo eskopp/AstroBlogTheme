@@ -51,6 +51,8 @@ export interface BlogThemeOptions {
   mermaid?: boolean;
   /** Render $...$ / $$...$$ math (and \ce{} chemistry) at build time with KaTeX. Requires remark-math, rehype-katex, katex in the consumer. Default `false`. */
   math?: boolean;
+  /** Render ```fen code blocks (a FEN string) as a static inline SVG chessboard at build time. No client-side JS. Add `black` after the language to flip the board. Default `false`. */
+  chess?: boolean;
   /** Default colour scheme before the visitor picks one: "system" (default), "light" or "dark". */
   colorScheme?: "system" | "light" | "dark";
   /** Inject `/blog`, `/blog/[...slug]`, `/rss.xml` and `/404`. Default `true`. */
