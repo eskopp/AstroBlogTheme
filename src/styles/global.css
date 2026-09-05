@@ -270,6 +270,10 @@ pre code {
   pointer-events: none;
 }
 
+.chess-board__evalbar-wrap[hidden] {
+  display: none;
+}
+
 .chess-board__evalbar-wrap {
   flex: none;
   align-self: stretch;

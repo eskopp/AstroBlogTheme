@@ -800,6 +800,11 @@
       if (!toggle || !output) return;
       const d = toggle.dataset;
 
+      const evalBar = ctx.board.querySelector<HTMLElement>(
+        ".chess-board__evalbar-wrap",
+      );
+      if (evalBar) evalBar.hidden = false;
+
       toggle.disabled = true;
       toggle.textContent = d.labelLoading ?? "…";
       output.hidden = true;

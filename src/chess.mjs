@@ -147,7 +147,7 @@ export function renderChessBoard(fen, options = {}) {
     `<a class="chess-board__lichess" href="${lichessUrl}" target="_blank" rel="noopener noreferrer">Open in Lichess</a>`;
 
   const evalBar = options.evalBar
-    ? `<div class="chess-board__evalbar-wrap">` +
+    ? `<div class="chess-board__evalbar-wrap" hidden>` +
       `<div class="chess-board__evalbar"><div class="chess-board__evalbar-fill" style="height:50%"></div></div>` +
       `<div class="chess-board__evalbar-label"></div>` +
       `</div>`
