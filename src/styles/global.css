@@ -262,6 +262,10 @@ pre code {
   cursor: grabbing;
 }
 
+.chess-board__arrow {
+  pointer-events: none;
+}
+
 .chess-board__panel {
   display: flex;
   flex: none;

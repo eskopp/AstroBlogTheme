@@ -2,7 +2,7 @@
 ---
 
 <script>
-  import { renderChessBoard, xyToSquare } from "../chess.mjs";
+  import { renderChessBoard, xyToSquare, squareToXY } from "../chess.mjs";
 
   interface HistEntry {
     san: string;
@@ -133,6 +133,49 @@
       return s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
     }
 
+    const STANDARD_START =
+      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
+    /** SAN move text up to the current cursor, e.g. "1. e4 e5 2. Nf3". */
+    function buildMoveText(ctx: Ctx): string {
+      let out = "";
+      let moveNo = ctx.startFullmove;
+      let turn = ctx.startColor;
+      if (turn === "b" && ctx.cursor >= 0) out += `${moveNo}... `;
+      for (let i = 0; i <= ctx.cursor; i++) {
+        if (turn === "w") out += `${moveNo}. `;
+        out += ctx.history[i].san + " ";
+        if (turn === "b") moveNo++;
+        turn = turn === "w" ? "b" : "w";
+      }
+      return out.trim();
+    }
+
+    /** Open in Lichess as a game (PGN + moves), not just a static FEN. */
+    function buildLichessUrl(ctx: Ctx): string {
+      const moves = buildMoveText(ctx);
+      const pgn =
+        ctx.initialFen.trim() === STANDARD_START
+          ? moves
+          : `[FEN "${ctx.initialFen.trim()}"]\n[SetUp "1"]\n\n${moves}`;
+      return `https://lichess.org/analysis/pgn/${encodeURIComponent(pgn)}`;
+    }
+
+    /** Once moves exist, point "Open in Lichess" at the full game instead of a bare FEN. */
+    function updateLichessLink(ctx: Ctx) {
+      if (ctx.cursor === -1) return;
+      const link = ctx.board.querySelector<HTMLAnchorElement>(
+        ".chess-board__lichess",
+      );
+      if (link) link.href = buildLichessUrl(ctx);
+    }
+
+    function refreshBoardUI(ctx: Ctx) {
+      renderBoard(ctx);
+      renderMoveList(ctx);
+      updateLichessLink(ctx);
+    }
+
     /** Append a played move at the current cursor, discarding any redone future. */
     function pushMove(ctx: Ctx, move: any) {
       ctx.history = ctx.history.slice(0, ctx.cursor + 1);
@@ -183,8 +226,7 @@
       ctx.fen = fen;
       ctx.chess = new Chess(fen);
       ctx.lastMove = index === -1 ? null : ctx.history[index].lastMove;
-      renderBoard(ctx);
-      renderMoveList(ctx);
+      refreshBoardUI(ctx);
     }
 
     function svgPoint(svg: SVGSVGElement, evt: PointerEvent) {
@@ -215,8 +257,7 @@
         return;
       }
       pushMove(ctx, move);
-      renderBoard(ctx);
-      renderMoveList(ctx);
+      refreshBoardUI(ctx);
 
       if (active?.ctx === ctx) {
         await active.stop();
@@ -299,8 +340,7 @@
         if (!move) break;
         pushMove(ctx, move);
       }
-      renderBoard(ctx);
-      renderMoveList(ctx);
+      refreshBoardUI(ctx);
     }
 
     function renderLines(
@@ -323,6 +363,75 @@
             applyLineToBoard(ctx, sorted[i][1].moves),
           );
         });
+      renderArrows(ctx, sorted);
+    }
+
+    const ARROW_COLORS = ["#1a9850", "#4575b4", "#8a8f98"];
+    const SQ = 45;
+
+    function ensureArrowMarker(svg: SVGSVGElement, id: string, color: string) {
+      let defs = svg.querySelector("defs");
+      if (!defs) {
+        defs = document.createElementNS(svg.namespaceURI, "defs");
+        svg.prepend(defs);
+      }
+      if (svg.querySelector(`#${id}`)) return;
+      const marker = document.createElementNS(svg.namespaceURI, "marker");
+      marker.setAttribute("id", id);
+      marker.setAttribute("viewBox", "0 0 10 10");
+      marker.setAttribute("refX", "8");
+      marker.setAttribute("refY", "5");
+      marker.setAttribute("markerWidth", "5");
+      marker.setAttribute("markerHeight", "5");
+      marker.setAttribute("orient", "auto-start-reverse");
+      const path = document.createElementNS(svg.namespaceURI, "path");
+      path.setAttribute("d", "M0,0 L10,5 L0,10 z");
+      path.setAttribute("fill", color);
+      marker.appendChild(path);
+      defs.appendChild(marker);
+    }
+
+    /** Draws the top engine lines' first move as arrows, best (index 0) on top. */
+    function renderArrows(
+      ctx: Ctx,
+      sorted: [number, { text: string; moves: string[] }][],
+    ) {
+      const svg = ctx.board.querySelector<SVGSVGElement>(
+        ".chess-board__frame svg",
+      );
+      if (!svg) return;
+      svg.querySelectorAll(".chess-board__arrow").forEach((el) => el.remove());
+
+      for (let i = sorted.length - 1; i >= 0; i--) {
+        const uci = sorted[i][1].moves[0];
+        if (!uci) continue;
+        const from = squareToXY(uci.slice(0, 2), ctx.orientation);
+        const to = squareToXY(uci.slice(2, 4), ctx.orientation);
+        const x1 = from.x + SQ / 2;
+        const y1 = from.y + SQ / 2;
+        const dx = to.x - from.x;
+        const dy = to.y - from.y;
+        const len = Math.hypot(dx, dy) || 1;
+        // shorten so the arrowhead lands before the square's centre
+        const x2 = from.x + SQ / 2 + (dx / len) * (len - SQ * 0.35);
+        const y2 = from.y + SQ / 2 + (dy / len) * (len - SQ * 0.35);
+        const color = ARROW_COLORS[i] ?? ARROW_COLORS[ARROW_COLORS.length - 1];
+        const markerId = `chess-arrow-head-${i}`;
+        ensureArrowMarker(svg, markerId, color);
+
+        const line = document.createElementNS(svg.namespaceURI, "line");
+        line.setAttribute("class", "chess-board__arrow");
+        line.setAttribute("x1", String(x1));
+        line.setAttribute("y1", String(y1));
+        line.setAttribute("x2", String(x2));
+        line.setAttribute("y2", String(y2));
+        line.setAttribute("stroke", color);
+        line.setAttribute("stroke-width", "6");
+        line.setAttribute("stroke-linecap", "round");
+        line.setAttribute("opacity", i === 0 ? "0.85" : "0.55");
+        line.setAttribute("marker-end", `url(#${markerId})`);
+        svg.appendChild(line);
+      }
     }
 
     async function start(ctx: Ctx) {
