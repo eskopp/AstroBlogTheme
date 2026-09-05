@@ -15,9 +15,17 @@
     // Only one infinite search runs at a time; starting another stops this one first.
     let active: { node: HTMLElement; stop: () => Promise<void> } | null = null;
 
+    // Multi-threading (SharedArrayBuffer) needs a cross-origin-isolated page
+    // (COOP/COEP headers); fall back to the single-threaded build otherwise.
+    const multiThreaded =
+      typeof SharedArrayBuffer !== "undefined" &&
+      (self as any).crossOriginIsolated === true;
+
     async function ensureEngine(): Promise<Worker> {
       if (worker) return worker;
-      const w = new Worker("/stockfish/engine.js");
+      const w = new Worker(
+        multiThreaded ? "/stockfish/engine-mt.js" : "/stockfish/engine.js",
+      );
       await new Promise<void>((resolve, reject) => {
         const onMessage = (e: MessageEvent) => {
           if (typeof e.data === "string" && e.data.includes("uciok")) {
@@ -31,6 +39,14 @@
         });
         w.postMessage("uci");
       });
+      if (multiThreaded) {
+        const threads = Math.max(
+          1,
+          Math.min((navigator.hardwareConcurrency || 4) - 1, 16),
+        );
+        w.postMessage(`setoption name Threads value ${threads}`);
+      }
+      w.postMessage("setoption name Hash value 128");
       w.postMessage("setoption name MultiPV value 3");
       worker = w;
       return w;

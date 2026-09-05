@@ -319,6 +319,14 @@ export default function blogTheme(options = {}) {
               pattern: "/stockfish/engine.wasm",
               entrypoint: at("stockfish-engine.wasm.ts"),
             });
+            injectRoute({
+              pattern: "/stockfish/engine-mt.js",
+              entrypoint: at("stockfish-engine-mt.js.ts"),
+            });
+            injectRoute({
+              pattern: "/stockfish/engine-mt.wasm",
+              entrypoint: at("stockfish-engine-mt.wasm.ts"),
+            });
           }
           // 404 + 500 emit flat .html; 403/503/429 emit <code>/index.html
           for (const code of [404, 403, 500, 503, 429]) {
