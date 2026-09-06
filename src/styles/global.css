@@ -541,10 +541,31 @@ pre code {
   border-radius: 4px;
   padding: 0.1rem 0.3rem;
   margin: -0.1rem -0.3rem;
+  line-height: 1.7;
 }
 
 .chess-engine__line:hover {
   background: var(--border);
+}
+
+.chess-engine__eval {
+  font-weight: 600;
+}
+
+.chess-engine__moveno {
+  color: var(--text-muted);
+}
+
+.chess-engine__move {
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 0.05rem 0.2rem;
+  margin: 0 -0.05rem;
+}
+
+.chess-engine__move:hover {
+  background: var(--accent);
+  color: var(--surface);
 }
 
 .chess-engine__credit {

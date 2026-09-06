@@ -99,17 +99,24 @@
 
     const MAX_PLIES = 8;
 
-    /** UCI moves (e.g. "e2e4") -> a short SAN line, e.g. "1. e4 e5 2. Nf3". */
-    function formatLine(
+    /**
+     * UCI moves (e.g. "e2e4") -> a short SAN line as HTML, e.g.
+     * "1. e4 e5 2. Nf3". Each move is a `.chess-engine__move` span carrying
+     * its `data-ply` so a click can jump to exactly that point in the line
+     * rather than the end of the variation.
+     */
+    function formatLineHtml(
       fen: string,
       uciMoves: string[],
       Chess: any,
       maxPlies = MAX_PLIES,
     ): string {
       const chess = new Chess(fen);
-      const parts: string[] = [];
+      let html = "";
       let moveNo = parseInt(fen.split(/\s+/)[5] || "1", 10) || 1;
-      if (chess.turn() === "b") parts.push(`${moveNo}...`);
+      if (chess.turn() === "b") {
+        html += `<span class="chess-engine__moveno">${moveNo}...</span> `;
+      }
       for (let i = 0; i < uciMoves.length && i < maxPlies; i++) {
         const uci = uciMoves[i];
         const whiteToMove = chess.turn() === "w";
@@ -125,13 +132,12 @@
         }
         if (!move) break;
         if (whiteToMove) {
-          parts.push(`${moveNo}.`, move.san);
-        } else {
-          parts.push(move.san);
-          moveNo++;
+          html += `<span class="chess-engine__moveno">${moveNo}.</span> `;
         }
+        html += `<span class="chess-engine__move" data-ply="${i}">${escHtml(move.san)}</span> `;
+        if (!whiteToMove) moveNo++;
       }
-      return parts.join(" ");
+      return html.trim();
     }
 
     function renderBoard(ctx: Ctx) {
@@ -680,12 +686,21 @@
       }
     }
 
-    async function applyLineToBoard(ctx: Ctx, uciMoves: string[]) {
+    async function applyLineToBoard(
+      ctx: Ctx,
+      baseNode: MoveNode,
+      uciMoves: string[],
+    ) {
       if (active?.ctx === ctx) await active.stop();
       const Chess = await ensureChess();
-      // Engine analysis only runs on the current position, so ctx.chess already
-      // reflects the line's base position (nothing else can mutate it meanwhile).
-      if (!ctx.chess) ctx.chess = new Chess(ctx.fen);
+      // Always replay from the position the engine analysed, so clicking a
+      // second move in the same line (after an earlier click already advanced
+      // the board) still lands where expected. `addMove` de-duplicates, so
+      // this reuses the existing nodes rather than branching.
+      ctx.currentNode = baseNode;
+      ctx.fen = baseNode.fen;
+      ctx.lastMove = baseNode === ctx.root ? null : baseNode.lastMove;
+      ctx.chess = new Chess(baseNode.fen);
       for (let i = 0; i < uciMoves.length && i < MAX_PLIES; i++) {
         const uci = uciMoves[i];
         let move: any = null;
@@ -708,6 +723,7 @@
       output: HTMLElement,
       lines: Map<number, { text: string; moves: string[] }>,
       ctx: Ctx,
+      baseNode: MoveNode,
     ) {
       const sorted = [...lines.entries()].sort((a, b) => a[0] - b[0]);
       output.innerHTML =
@@ -720,8 +736,20 @@
       output
         .querySelectorAll<HTMLElement>(".chess-engine__line")
         .forEach((el, i) => {
+          const moves = sorted[i][1].moves;
+          // Click a single move -> jump to exactly that point in the line.
+          // Click anywhere else on the row -> play the whole line.
+          el.querySelectorAll<HTMLElement>(".chess-engine__move").forEach(
+            (span) => {
+              span.addEventListener("click", (e) => {
+                e.stopPropagation();
+                const ply = parseInt(span.dataset.ply || "0", 10);
+                applyLineToBoard(ctx, baseNode, moves.slice(0, ply + 1));
+              });
+            },
+          );
           el.addEventListener("click", () =>
-            applyLineToBoard(ctx, sorted[i][1].moves),
+            applyLineToBoard(ctx, baseNode, moves),
           );
         });
       renderArrows(ctx, sorted);
@@ -824,6 +852,7 @@
         const [engine, Chess] = await Promise.all([ensureEngine(), ensureChess()]);
         if (ctx.engineHidden) return;
         const searchFen = ctx.fen;
+        const searchNode = ctx.currentNode;
         const activeColor = searchFen.split(/\s+/)[1] === "b" ? "b" : "w";
         const lines = new Map<number, { text: string; moves: string[] }>();
 
@@ -850,9 +879,12 @@
                   if (mpv[1] === "1") updateEvalBar(ctx, { cp: val });
                 }
                 const moves = pv[1].trim().split(/\s+/);
-                const san = formatLine(searchFen, moves, Chess);
-                lines.set(parseInt(mpv[1], 10), { text: `${evalStr}  ${san}`, moves });
-                renderLines(output, lines, ctx);
+                const san = formatLineHtml(searchFen, moves, Chess);
+                lines.set(parseInt(mpv[1], 10), {
+                  text: `<span class="chess-engine__eval">${evalStr}</span> ${san}`,
+                  moves,
+                });
+                renderLines(output, lines, ctx, searchNode);
               }
             } else if (line.startsWith("bestmove")) {
               engine.removeEventListener("message", onMessage);
