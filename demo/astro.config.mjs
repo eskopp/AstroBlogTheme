@@ -25,6 +25,10 @@ export default defineConfig({
         contact: "https://example.com/security",
         preferredLanguages: ["en", "de"],
       },
+      pwa: {
+        themeColor: "#fbfbfc",
+        backgroundColor: "#fbfbfc",
+      },
       license: { label: "CC BY-ND 4.0", href: "https://creativecommons.org/licenses/by-nd/4.0/deed.de" },
       social: [
         { href: "https://github.com/eskopp/AstroBlogTheme", label: "GitHub" },

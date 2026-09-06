@@ -1,3 +1,5 @@
+import { readFile, writeFile, readdir, stat } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 import sitemap from "@astrojs/sitemap";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import { visit } from "unist-util-visit";
@@ -223,7 +225,20 @@ const DEFAULTS = {
   chessEngine: false,
   colorScheme: "system",
   security: null,
+  pwa: null,
 };
+
+/** `pwa: true | {…}` -> a filled-in object, or null when disabled. */
+function normalizePwa(pwa, options) {
+  if (!pwa) return null;
+  const p = pwa === true ? {} : { ...pwa };
+  p.name ??= options.title ?? DEFAULTS.title;
+  p.shortName ??= p.name;
+  p.themeColor ??= "#ffffff";
+  p.backgroundColor ??= p.themeColor;
+  p.icon ??= "/favicon.svg";
+  return p;
+}
 
 function resolveConfig(options) {
   const merged = {
@@ -247,6 +262,7 @@ function resolveConfig(options) {
     colorScheme: options.colorScheme ?? DEFAULTS.colorScheme,
     postList: options.postList === "rows" ? "rows" : DEFAULTS.postList,
     security: options.security ?? DEFAULTS.security,
+    pwa: normalizePwa(options.pwa, options),
   };
   merged.defaultLocale = merged.locales[0];
   return merged;
@@ -367,6 +383,12 @@ export default function blogTheme(options = {}) {
             entrypoint: at("llms-full.txt.ts"),
           });
           injectRoute({ pattern: "/humans.txt", entrypoint: at("humans.txt.ts") });
+          if (config.pwa) {
+            injectRoute({
+              pattern: "/manifest.webmanifest",
+              entrypoint: at("manifest.webmanifest.ts"),
+            });
+          }
           if (config.security?.contact) {
             injectRoute({
               pattern: "/.well-known/security.txt",
@@ -420,6 +442,110 @@ export default function blogTheme(options = {}) {
           );
         }
       },
+
+      "astro:config:done": ({ config: astroConfig }) => {
+        pwaBuild.publicDir = astroConfig.publicDir;
+        pwaBuild.base = astroConfig.base || "/";
+      },
+
+      "astro:build:done": async ({ dir, logger }) => {
+        if (!config.pwa) return;
+        try {
+          await emitPwaAssets({ dir, config, pwaBuild, logger });
+        } catch (err) {
+          logger.warn(
+            `pwa: could not generate the service worker / icons (${err.message}). Skipping.`,
+          );
+        }
+      },
     },
   };
+}
+
+/** Set in astro:config:done, read in astro:build:done. */
+const pwaBuild = { publicDir: null, base: "/" };
+
+const PWA_MAX_PRECACHE_BYTES = 600_000;
+const PWA_SKIP = [
+  /\.map$/,
+  /\.xml$/,
+  /^\/stockfish\//,
+  /^\/sw\.js$/,
+  /^\/service-worker\.js$/,
+];
+
+/** Walk `dist/`, write hashed PNG icons and a service worker with a precache list. */
+async function emitPwaAssets({ dir, config, pwaBuild, logger }) {
+  const sharp = (await import("sharp")).default;
+  const outDir = fileURLToPath(dir);
+
+  // --- icons, rendered from the configured source image ---
+  const iconRel = config.pwa.icon.replace(/^\//, "");
+  const iconPath = fileURLToPath(new URL(iconRel, pwaBuild.publicDir));
+  const src = await readFile(iconPath);
+  const svg = iconRel.toLowerCase().endsWith(".svg");
+  const load = () => sharp(src, svg ? { density: 384 } : {});
+  const transparent = { r: 0, g: 0, b: 0, alpha: 0 };
+
+  const icon192 = await load()
+    .resize(192, 192, { fit: "contain", background: transparent })
+    .png()
+    .toBuffer();
+  const icon512 = await load()
+    .resize(512, 512, { fit: "contain", background: transparent })
+    .png()
+    .toBuffer();
+  // maskable: the icon at ~86% on a filled background, leaving the mask's safe zone
+  const inner = await load()
+    .resize(440, 440, { fit: "contain", background: transparent })
+    .png()
+    .toBuffer();
+  const maskable = await sharp({
+    create: {
+      width: 512,
+      height: 512,
+      channels: 4,
+      background: config.pwa.backgroundColor,
+    },
+  })
+    .composite([{ input: inner, gravity: "center" }])
+    .png()
+    .toBuffer();
+
+  await writeFile(new URL("pwa-icon-192.png", dir), icon192);
+  await writeFile(new URL("pwa-icon-512.png", dir), icon512);
+  await writeFile(new URL("pwa-icon-maskable.png", dir), maskable);
+
+  // --- precache list from the built output ---
+  const precache = new Set(["/"]);
+  async function walk(absDir, urlPrefix) {
+    for (const entry of await readdir(absDir, { withFileTypes: true })) {
+      const abs = `${absDir}/${entry.name}`;
+      const rel = `${urlPrefix}${entry.name}`;
+      if (entry.isDirectory()) {
+        await walk(abs, `${rel}/`);
+        continue;
+      }
+      const url = entry.name === "index.html" ? `/${urlPrefix}` : `/${rel}`;
+      if (PWA_SKIP.some((re) => re.test(url))) continue;
+      const { size } = await stat(abs);
+      if (size > PWA_MAX_PRECACHE_BYTES) continue;
+      precache.add(url);
+    }
+  }
+  await walk(outDir.replace(/\/$/, ""), "");
+
+  const buildId = Date.now().toString(36);
+  const template = await readFile(
+    new URL("./src/pwa/service-worker.js", import.meta.url),
+    "utf8",
+  );
+  const sw = template
+    .replaceAll("__BUILD_ID__", buildId)
+    .replaceAll(
+      '"__PRECACHE__"',
+      JSON.stringify(JSON.stringify([...precache].sort())),
+    );
+  await writeFile(new URL("sw.js", dir), sw);
+  logger.info(`pwa: service worker + icons written (${precache.size} URLs precached)`);
 }

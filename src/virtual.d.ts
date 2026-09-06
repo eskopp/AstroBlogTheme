@@ -33,6 +33,13 @@ declare module "virtual:astro-blog-theme/config" {
       policy?: string;
       acknowledgments?: string;
     } | null;
+    pwa: {
+      name: string;
+      shortName: string;
+      themeColor: string;
+      backgroundColor: string;
+      icon: string;
+    } | null;
   }
   const config: ThemeConfig;
   export default config;

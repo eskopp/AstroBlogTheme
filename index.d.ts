@@ -71,6 +71,28 @@ export interface BlogThemeOptions {
     policy?: string;
     acknowledgments?: string;
   };
+  /**
+   * Turn the site into an installable PWA: a generated `/manifest.webmanifest`,
+   * PNG icons rendered from `icon` (192, 512 and a maskable 512) via `sharp`,
+   * and a `/sw.js` that precaches every page and hashed asset for offline use
+   * (large files like the Stockfish WASM are cached on first use instead).
+   * Pass `true` for defaults, or an object to override. Requires `sharp`
+   * (bundled with Astro). Only takes effect for `astro build`, not `astro dev`.
+   */
+  pwa?:
+    | boolean
+    | {
+        /** App name. Default: `title`. */
+        name?: string;
+        /** Home-screen label. Default: `name`. */
+        shortName?: string;
+        /** `theme_color` and the `theme-color` meta. Default `"#ffffff"`. */
+        themeColor?: string;
+        /** Splash background and the maskable icon's padding. Default: `themeColor`. */
+        backgroundColor?: string;
+        /** Source image in `public/` for the icons. Default `"/favicon.svg"`. */
+        icon?: string;
+      };
   /** Inject `/blog`, `/blog/[...slug]`, `/rss.xml` and `/404`. Default `true`. */
   injectRoutes?: boolean;
   /** Add `@astrojs/sitemap` unless already present. Default `true`. */
