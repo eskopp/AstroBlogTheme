@@ -128,8 +128,12 @@ function remarkChessPassthrough(config) {
     visit(tree, "code", (node, index, parent) => {
       if (node.lang !== "fen" || !parent || index === undefined) return;
       // No meta: the side to move sits at the bottom. `white`/`black` pins it.
-      const meta = (node.meta || "").trim();
-      const orientation = meta === "white" || meta === "black" ? meta : undefined;
+      // `noengine` drops the eval bar, arrows and engine for this one board
+      // even when `chessEngine` is on globally.
+      const metaTokens = (node.meta || "").trim().split(/\s+/).filter(Boolean);
+      const orientation = metaTokens.find((t) => t === "white" || t === "black");
+      const noEngine = metaTokens.includes("noengine");
+      const boardEngine = config.chessEngine && !noEngine;
       const locale = localeFromFile(file, config);
       const l = { ...CHESS_ENGINE_LABELS.en, ...(CHESS_ENGINE_LABELS[locale] || {}) };
 
@@ -137,7 +141,7 @@ function remarkChessPassthrough(config) {
       try {
         board = renderChessBoard(node.value, {
           orientation,
-          evalBar: config.chessEngine,
+          evalBar: boardEngine,
           lichessLabel: l.openInLichess,
         });
       } catch (err) {
@@ -152,7 +156,7 @@ function remarkChessPassthrough(config) {
 
       let engine = "";
       let controls = "";
-      if (config.chessEngine) {
+      if (boardEngine) {
         engine =
           `<div class="chess-engine" hidden>` +
           `<button type="button" class="chess-engine__toggle" ` +
@@ -180,6 +184,7 @@ function remarkChessPassthrough(config) {
         type: "html",
         value:
           `<div class="chess-board" data-fen="${fen}" data-orientation="${resolvedOrientation}" ` +
+          (boardEngine ? "" : `data-no-engine `) +
           `data-lichess-label="${l.openInLichess}">` +
           `${board}${controls}${engine}</div>`,
       };

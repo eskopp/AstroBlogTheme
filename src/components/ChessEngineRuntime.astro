@@ -37,7 +37,9 @@
   const SQ = 45;
   const BOARD = SQ * 8;
 
-  const boards = [...document.querySelectorAll<HTMLElement>(".chess-board")];
+  const boards = [
+    ...document.querySelectorAll<HTMLElement>(".chess-board:not([data-no-engine])"),
+  ];
   if (
     boards.length > 0 &&
     typeof Worker !== "undefined" &&
