@@ -53,7 +53,7 @@ export interface BlogThemeOptions {
   math?: boolean;
   /** Render ```fen code blocks (a FEN string) as a static inline SVG chessboard at build time. No client-side JS. The board orients to put the side to move at the bottom; add `white` or `black` after the language to pin it instead. Default `false`. */
   chess?: boolean;
-  /** Add an opt-in "Load engine" button under each chess board that runs Stockfish (WASM, single-threaded) in a Web Worker to show an evaluation and the top lines. Only takes effect together with `chess: true`. Requires `stockfish` and `chess.js` installed in the consumer. The button (and all engine code) only appears once client-side JS has run — with JS disabled, nothing is shown. Add `noengine` after the ```fen language (alongside an optional `white`/`black`) to drop the eval bar, arrows, engine and move controls for that one board. Default `false`. */
+  /** Add an opt-in "Load engine" button under each chess board that runs Stockfish (WASM, single-threaded) in a Web Worker to show an evaluation and the top lines. Only takes effect together with `chess: true`. Requires `stockfish` and `chess.js` installed in the consumer. The button (and all engine code) only appears once client-side JS has run — with JS disabled, nothing is shown. Once loaded, a "Hide engine" button tears the analysis back down to a plain board (eval bar, arrows and lines removed). Add `noengine` after the ```fen language (alongside an optional `white`/`black`) to drop the eval bar, arrows, engine and move controls for that one board. Default `false`. */
   chessEngine?: boolean;
   /** Default colour scheme before the visitor picks one: "system" (default), "light" or "dark". */
   colorScheme?: "system" | "light" | "dark";

@@ -92,6 +92,7 @@ const CHESS_ENGINE_LABELS = {
     stop: "Stoppen",
     stopping: "Stoppt…",
     reanalyze: "Erneut analysieren",
+    hide: "Engine ausblenden",
     error: "Engine konnte nicht geladen werden.",
     reset: "Zurück zur Grundstellung",
     openInLichess: "In Lichess öffnen",
@@ -109,6 +110,7 @@ const CHESS_ENGINE_LABELS = {
     stop: "Stop",
     stopping: "Stopping…",
     reanalyze: "Analyze again",
+    hide: "Hide engine",
     error: "Could not load the engine.",
     reset: "Back to starting position",
     copy: "Copy",
@@ -163,6 +165,7 @@ function remarkChessPassthrough(config) {
           `data-label-load="${l.load}" data-label-loading="${l.loading}" ` +
           `data-label-stop="${l.stop}" data-label-stopping="${l.stopping}" ` +
           `data-label-reanalyze="${l.reanalyze}" data-label-error="${l.error}">${l.load}</button>` +
+          `<button type="button" class="chess-engine__hide" hidden>${l.hide}</button>` +
           `<div class="chess-engine__lines" hidden></div>` +
           `</div>`;
         controls =

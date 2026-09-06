@@ -31,6 +31,8 @@
     nodesById: Map<number, MoveNode>;
     /** Tap-to-move: the square lifted by a first tap, awaiting a destination tap. */
     selected: string | null;
+    /** Set while "Hide engine" is tearing the analysis down, so a still-running search doesn't restore it. */
+    engineHidden: boolean;
   }
 
   let nextNodeId = 1;
@@ -794,12 +796,16 @@
 
     async function start(ctx: Ctx) {
       if (active) await active.stop();
+      ctx.engineHidden = false;
 
       const toggle = ctx.engineNode?.querySelector<HTMLButtonElement>(
         ".chess-engine__toggle",
       );
       const output = ctx.engineNode?.querySelector<HTMLElement>(
         ".chess-engine__lines",
+      );
+      const hideBtn = ctx.engineNode?.querySelector<HTMLButtonElement>(
+        ".chess-engine__hide",
       );
       if (!toggle || !output) return;
       const d = toggle.dataset;
@@ -816,6 +822,7 @@
 
       try {
         const [engine, Chess] = await Promise.all([ensureEngine(), ensureChess()]);
+        if (ctx.engineHidden) return;
         const searchFen = ctx.fen;
         const activeColor = searchFen.split(/\s+/)[1] === "b" ? "b" : "w";
         const lines = new Map<number, { text: string; moves: string[] }>();
@@ -859,6 +866,7 @@
 
         toggle.textContent = d.labelStop ?? "Stop";
         toggle.disabled = false;
+        if (hideBtn) hideBtn.hidden = false;
         active = {
           ctx,
           stop: async () => {
@@ -871,12 +879,60 @@
 
         await done;
         active = null;
+        if (ctx.engineHidden) return;
         toggle.textContent = d.labelReanalyze ?? d.labelLoad ?? "";
         toggle.disabled = false;
       } catch (err) {
         console.error("stockfish analysis failed:", err);
         active = null;
+        if (ctx.engineHidden) return;
         toggle.textContent = d.labelError ?? "Error";
+        toggle.disabled = false;
+      }
+    }
+
+    /** Tears the analysis back down to a plain board: stops the search, drops the
+     *  eval bar, arrows and lines, and resets the button to "Load engine". */
+    async function hideEngine(ctx: Ctx) {
+      ctx.engineHidden = true;
+      if (active?.ctx === ctx) {
+        const stop = active.stop;
+        await stop();
+        if (active?.ctx === ctx) active = null;
+      }
+
+      const evalBar = ctx.board.querySelector<HTMLElement>(
+        ".chess-board__evalbar-wrap",
+      );
+      if (evalBar) evalBar.hidden = true;
+      const fill = ctx.board.querySelector<HTMLElement>(
+        ".chess-board__evalbar-fill",
+      );
+      if (fill) fill.style.height = "50%";
+      const evalLabel = ctx.board.querySelector<HTMLElement>(
+        ".chess-board__evalbar-label",
+      );
+      if (evalLabel) evalLabel.textContent = "";
+      ctx.board
+        .querySelectorAll(".chess-board__arrow")
+        .forEach((el) => el.remove());
+
+      const output = ctx.engineNode?.querySelector<HTMLElement>(
+        ".chess-engine__lines",
+      );
+      if (output) {
+        output.hidden = true;
+        output.innerHTML = "";
+      }
+      const hideBtn = ctx.engineNode?.querySelector<HTMLButtonElement>(
+        ".chess-engine__hide",
+      );
+      if (hideBtn) hideBtn.hidden = true;
+      const toggle = ctx.engineNode?.querySelector<HTMLButtonElement>(
+        ".chess-engine__toggle",
+      );
+      if (toggle) {
+        toggle.textContent = toggle.dataset.labelLoad ?? "";
         toggle.disabled = false;
       }
     }
@@ -913,6 +969,7 @@
         currentNode: root,
         nodesById: new Map([[root.id, root]]),
         selected: null,
+        engineHidden: false,
       };
       attachPieceHandlers(ctx);
       engineNode
@@ -924,6 +981,9 @@
             start(ctx);
           }
         });
+      engineNode
+        ?.querySelector<HTMLButtonElement>(".chess-engine__hide")
+        ?.addEventListener("click", () => hideEngine(ctx));
       controlsNode
         ?.querySelector<HTMLButtonElement>(".chess-controls__reset")
         ?.addEventListener("click", () => gotoNode(ctx, ctx.root));

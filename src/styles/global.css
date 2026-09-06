@@ -500,6 +500,25 @@ pre code {
   cursor: default;
 }
 
+.chess-engine__hide {
+  font-size: 0.72rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.chess-engine__hide:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.chess-engine__hide[hidden] {
+  display: none;
+}
+
 .chess-engine__lines[hidden] {
   display: none;
 }
