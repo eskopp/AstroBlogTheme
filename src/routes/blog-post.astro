@@ -27,8 +27,19 @@ export async function getStaticPaths() {
 
 const { post, prev, next } = Astro.props;
 const { Content, headings } = await render(post);
+
+const body = post.body ?? "";
+const needsMermaid = /(^|\n)```\s*mermaid\b/.test(body);
+const needsChess = /(^|\n)```\s*fen\b/.test(body);
 ---
 
-<PostLayout post={post} prev={prev} next={next} headings={headings}>
+<PostLayout
+  post={post}
+  prev={prev}
+  next={next}
+  headings={headings}
+  needsMermaid={needsMermaid}
+  needsChess={needsChess}
+>
   <Content />
 </PostLayout>

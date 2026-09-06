@@ -7,7 +7,7 @@ const locale = defaultLocale;
 const series = await getSeriesList(locale);
 ---
 
-<BaseLayout locale={locale} title={t("allSeries", locale)}>
+<BaseLayout locale={locale} title={t("allSeries", locale)} needsMermaid={false} needsChess={false}>
   <div class="series-index-page">
     <h1>{t("allSeries", locale)}</h1>
     {

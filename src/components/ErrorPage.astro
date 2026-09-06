@@ -12,7 +12,13 @@ const { code, titleKey, bodyKey } = Astro.props;
 const locale = config.errorLocale ?? defaultLocale;
 ---
 
-<BaseLayout locale={locale} title={t(titleKey, locale)} noindex>
+<BaseLayout
+  locale={locale}
+  title={t(titleKey, locale)}
+  noindex
+  needsMermaid={false}
+  needsChess={false}
+>
   <div class="errorpage">
     <p class="errorpage__code">{code}</p>
     <h1>{t(titleKey, locale)}</h1>

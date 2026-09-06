@@ -16,7 +16,7 @@ for (const post of posts) {
 const years = [...groups.keys()].sort((a, b) => b - a);
 ---
 
-<BaseLayout locale={locale} title={t("blog", locale)}>
+<BaseLayout locale={locale} title={t("blog", locale)} needsMermaid={false} needsChess={false}>
   <h1>{t("blog", locale)}</h1>
   {
     years.map((year) => (

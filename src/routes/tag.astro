@@ -29,6 +29,8 @@ const locale = defaultLocale;
   locale={locale}
   title={`#${tagName}`}
   description={t("postsTagged", locale, { tag: tagName })}
+  needsMermaid={false}
+  needsChess={false}
 >
   <p class="tag-page__back">
     <a href="/tags">← {t("allTags", locale)}</a>

@@ -23,6 +23,13 @@ interface Props {
   noindex?: boolean;
   /** Article dates for BlogPosting structured data. */
   articleMeta?: { published: string; modified?: string };
+  /**
+   * Whether this page can contain a Mermaid diagram / interactive chess board.
+   * Defaults to the global option; routes that never render them (post lists,
+   * tag and series pages) pass `false` so the runtime isn't shipped there.
+   */
+  needsMermaid?: boolean;
+  needsChess?: boolean;
 }
 
 const {
@@ -35,6 +42,8 @@ const {
   alternates = [],
   noindex = false,
   articleMeta,
+  needsMermaid = config.mermaid,
+  needsChess = config.chessEngine,
 } = Astro.props;
 ---
 
@@ -62,8 +71,8 @@ const {
     </main>
     <Footer locale={locale} />
 
-    {config.mermaid && <MermaidRuntime />}
-    {config.chessEngine && <ChessEngineRuntime />}
+    {config.mermaid && needsMermaid && <MermaidRuntime />}
+    {config.chessEngine && needsChess && <ChessEngineRuntime />}
 
     <button
       class="to-top"
@@ -78,6 +87,9 @@ const {
     </button>
 
     <script is:inline define:vars={{ copyLabel: t("copy", locale), copiedLabel: t("copied", locale) }}>
+      // Page decoration — deferred past first paint so it never sits on the
+      // critical rendering path.
+      requestAnimationFrame(() => {
       // 1. Open cross-origin links in a new tab.
       for (const a of document.querySelectorAll("a[href]")) {
         try {
@@ -156,6 +168,7 @@ const {
         addEventListener("scroll", onScroll, { passive: true });
         onScroll();
       }
+      });
     </script>
   </body>
 </html>

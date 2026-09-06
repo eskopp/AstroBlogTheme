@@ -9,7 +9,7 @@ const posts = await getPosts();
 const recent = posts.slice(0, config.postsPerPage);
 ---
 
-<BaseLayout>
+<BaseLayout needsMermaid={false} needsChess={false}>
   <section class="hero">
     <h1>{config.title}</h1>
     <p>{config.description}</p>
