@@ -3,7 +3,10 @@ import config from "virtual:astro-blog-theme/config";
 import { getPosts } from "../posts";
 import { postSlug, defaultLocale } from "../i18n";
 
-/** https://llmstxt.org — a markdown map of the site for language models. */
+/**
+ * https://llmstxt.org — like `/llms.txt`, but with every post's full text
+ * inlined so a model has the whole site in one request.
+ */
 export async function GET(context: APIContext) {
   const base = context.site ?? new URL("https://example.com");
   const abs = (path: string) => new URL(path, base).href;
@@ -14,26 +17,22 @@ export async function GET(context: APIContext) {
     "",
     `> ${config.description}`,
     "",
-    `## Pages`,
-    "",
-    `- [Blog](${abs("/blog/")}): all posts`,
-    `- [Tags](${abs("/tags/")}): posts by tag`,
-    `- [Series](${abs("/series/")}): multi-part posts`,
-    `- [Full text](${abs("/llms-full.txt")}): every post inlined`,
-    `- [RSS feed](${abs("/rss.xml")})`,
-    "",
-    `## Posts`,
-    "",
   ];
 
   for (const post of posts) {
     const url = abs(`/blog/${postSlug(post)}/`);
     const date = post.data.pubDate.toISOString().slice(0, 10);
     lines.push(
-      `- [${post.data.title}](${url}): ${post.data.description} (${date})`,
+      "---",
+      "",
+      `## ${post.data.title}`,
+      "",
+      `${url} · ${date}`,
+      "",
+      (post.body ?? "").trim(),
+      "",
     );
   }
-  lines.push("");
 
   return new Response(lines.join("\n"), {
     headers: { "content-type": "text/markdown; charset=utf-8" },

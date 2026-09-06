@@ -222,6 +222,7 @@ const DEFAULTS = {
   chess: false,
   chessEngine: false,
   colorScheme: "system",
+  security: null,
 };
 
 function resolveConfig(options) {
@@ -245,6 +246,7 @@ function resolveConfig(options) {
     chessEngine: (options.chess ?? DEFAULTS.chess) && (options.chessEngine ?? DEFAULTS.chessEngine),
     colorScheme: options.colorScheme ?? DEFAULTS.colorScheme,
     postList: options.postList === "rows" ? "rows" : DEFAULTS.postList,
+    security: options.security ?? DEFAULTS.security,
   };
   merged.defaultLocale = merged.locales[0];
   return merged;
@@ -360,6 +362,21 @@ export default function blogTheme(options = {}) {
           }
           injectRoute({ pattern: "/feed.json", entrypoint: at("feed.json.ts") });
           injectRoute({ pattern: "/llms.txt", entrypoint: at("llms.txt.ts") });
+          injectRoute({
+            pattern: "/llms-full.txt",
+            entrypoint: at("llms-full.txt.ts"),
+          });
+          injectRoute({ pattern: "/humans.txt", entrypoint: at("humans.txt.ts") });
+          if (config.security?.contact) {
+            injectRoute({
+              pattern: "/.well-known/security.txt",
+              entrypoint: at("security.txt.ts"),
+            });
+            injectRoute({
+              pattern: "/security.txt",
+              entrypoint: at("security.txt.ts"),
+            });
+          }
           injectRoute({
             pattern: "/og/[slug].svg",
             entrypoint: at("og/[slug].svg.ts"),

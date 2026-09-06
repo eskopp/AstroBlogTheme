@@ -21,6 +21,10 @@ export default defineConfig({
       ],
       mermaid: true,
       math: true,
+      security: {
+        contact: "https://example.com/security",
+        preferredLanguages: ["en", "de"],
+      },
       license: { label: "CC BY-ND 4.0", href: "https://creativecommons.org/licenses/by-nd/4.0/deed.de" },
       social: [
         { href: "https://github.com/eskopp/AstroBlogTheme", label: "GitHub" },

@@ -57,6 +57,20 @@ export interface BlogThemeOptions {
   chessEngine?: boolean;
   /** Default colour scheme before the visitor picks one: "system" (default), "light" or "dark". */
   colorScheme?: "system" | "light" | "dark";
+  /**
+   * RFC 9116 `security.txt`. Set `contact` (a `mailto:`, `https:` or `tel:` URI,
+   * or a list) to serve it at `/.well-known/security.txt` and `/security.txt`.
+   * `expires` defaults to one year from build time; `preferredLanguages`
+   * defaults to `locales`. Omit the whole option to serve nothing.
+   */
+  security?: {
+    contact: string | string[];
+    expires?: string;
+    preferredLanguages?: string[];
+    encryption?: string;
+    policy?: string;
+    acknowledgments?: string;
+  };
   /** Inject `/blog`, `/blog/[...slug]`, `/rss.xml` and `/404`. Default `true`. */
   injectRoutes?: boolean;
   /** Add `@astrojs/sitemap` unless already present. Default `true`. */
