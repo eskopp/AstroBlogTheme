@@ -1,8 +1,9 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import PostCard from "../components/PostCard.astro";
+import FormattedDate from "../components/FormattedDate.astro";
 import { getSeriesList } from "../series";
-import { defaultLocale, t } from "../i18n";
+import { readingTimeMinutes } from "../posts";
+import { postSlug, defaultLocale, t } from "../i18n";
 
 export async function getStaticPaths() {
   const series = await getSeriesList(defaultLocale);
@@ -14,6 +15,10 @@ export async function getStaticPaths() {
 
 const { title, posts } = Astro.props;
 const locale = defaultLocale;
+const totalMin = posts.reduce(
+  (sum: number, p: (typeof posts)[number]) => sum + readingTimeMinutes(p),
+  0,
+);
 ---
 
 <BaseLayout
@@ -21,15 +26,43 @@ const locale = defaultLocale;
   title={title}
   description={t("postsInSeries", locale, { series: title })}
 >
-  <p class="tag-page__back">
-    <a href="/series">← {t("allSeries", locale)}</a>
-  </p>
-  <h1>{title}</h1>
-  <ol class="series-page__list">
-    {posts.map((post) => (
-      <li>
-        <PostCard post={post} />
-      </li>
-    ))}
-  </ol>
+  <div class="series-detail">
+    <p class="series-detail__back">
+      <a href="/series">← {t("allSeries", locale)}</a>
+    </p>
+    <header class="series-detail__header">
+      <p class="series-detail__eyebrow">{t("series", locale)}</p>
+      <h1>{title}</h1>
+      <p class="series-detail__meta">
+        {t("seriesCount", locale, { count: posts.length })}
+        <span>·</span>
+        {t("readingTime", locale, { min: totalMin })}
+      </p>
+    </header>
+
+    <ol class="series-timeline">
+      {
+        posts.map((post, i) => (
+          <li class="series-timeline__item">
+            <div class="series-timeline__marker">{i + 1}</div>
+            <div class="series-timeline__body">
+              <p class="series-timeline__meta">
+                <FormattedDate date={post.data.pubDate} locale={locale} />
+                <span>·</span>
+                {t("readingTime", locale, {
+                  min: readingTimeMinutes(post),
+                })}
+              </p>
+              <h2 class="series-timeline__title">
+                <a href={`/blog/${postSlug(post)}/`}>{post.data.title}</a>
+              </h2>
+              {post.data.description && (
+                <p class="series-timeline__desc">{post.data.description}</p>
+              )}
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
 </BaseLayout>

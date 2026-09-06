@@ -8,20 +8,37 @@ const series = await getSeriesList(locale);
 ---
 
 <BaseLayout locale={locale} title={t("allSeries", locale)}>
-  <h1>{t("allSeries", locale)}</h1>
-  {
-    series.length === 0 ? (
-      <p>{t("noSeries", locale)}</p>
-    ) : (
-      <ul class="series-index">
-        {series.map((s) => (
-          <li>
-            <a href={`/series/${s.slug}/`}>
-              {s.title} <span class="series-index__count">{s.count}</span>
-            </a>
-          </li>
-        ))}
-      </ul>
-    )
-  }
+  <div class="series-index-page">
+    <h1>{t("allSeries", locale)}</h1>
+    {
+      series.length === 0 ? (
+        <p class="series-empty">{t("noSeries", locale)}</p>
+      ) : (
+        <ul class="series-cards">
+          {series.map((s) => (
+            <li>
+              <a class="series-card" href={`/series/${s.slug}/`}>
+                <div class="series-card__top">
+                  <h2 class="series-card__title">{s.title}</h2>
+                  <span class="series-card__badge">
+                    {t("seriesCount", locale, { count: s.count })}
+                  </span>
+                </div>
+                <ol class="series-card__parts">
+                  {s.posts.slice(0, 5).map((p) => (
+                    <li>{p.data.title}</li>
+                  ))}
+                  {s.posts.length > 5 && (
+                    <li class="series-card__parts-more">
+                      +{s.posts.length - 5}
+                    </li>
+                  )}
+                </ol>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
 </BaseLayout>

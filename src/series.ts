@@ -96,6 +96,7 @@ export async function getSeriesList(
 ): Promise<SeriesEntry[]> {
   const groups = await collectSeries(locale);
   return [...groups.entries()]
+    .filter(([, members]) => members.length >= 2)
     .map(([slug, members]) => ({
       key: members[0].name,
       slug,
