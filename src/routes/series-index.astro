@@ -1,0 +1,27 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getSeriesList } from "../series";
+import { defaultLocale, t } from "../i18n";
+
+const locale = defaultLocale;
+const series = await getSeriesList(locale);
+---
+
+<BaseLayout locale={locale} title={t("allSeries", locale)}>
+  <h1>{t("allSeries", locale)}</h1>
+  {
+    series.length === 0 ? (
+      <p>{t("noSeries", locale)}</p>
+    ) : (
+      <ul class="series-index">
+        {series.map((s) => (
+          <li>
+            <a href={`/series/${s.slug}/`}>
+              {s.title} <span class="series-index__count">{s.count}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</BaseLayout>

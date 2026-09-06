@@ -3,6 +3,8 @@ title: "Welcome"
 description: "A starter post so the demo has something to render."
 pubDate: 2026-08-30
 tags: ["meta"]
+series:
+  - { name: getting-started, order: 1, title: "Getting started" }
 ai: true
 ---
 

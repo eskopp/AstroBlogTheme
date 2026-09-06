@@ -3,6 +3,8 @@ title: "Info-Boxen"
 description: "Die fünf farbigen Hinweiskästen."
 pubDate: 2026-08-31
 tags: ["referenz"]
+series:
+  - { name: content-features, order: 3 }
 urlSlug: "info-boxen"
 ---
 

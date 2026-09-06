@@ -4,6 +4,9 @@ description: "Ein Testbeitrag für Mermaid-Diagramme."
 pubDate: 2026-08-31
 tags: ["meta"]
 urlSlug: "diagramme"
+series:
+  - { name: content-features, order: 1, title: "Inhalts-Features" }
+  - { name: getting-started, order: 3 }
 ---
 
 Mermaid-Diagramme werden im Browser gerendert, aus einem selbst gehosteten

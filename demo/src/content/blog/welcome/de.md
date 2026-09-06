@@ -4,6 +4,8 @@ description: "Ein Startbeitrag, damit die Demo etwas anzuzeigen hat."
 pubDate: 2026-08-30
 tags: ["meta"]
 urlSlug: "willkommen"
+series:
+  - { name: getting-started, order: 1, title: "Erste Schritte" }
 ai: true
 ---
 

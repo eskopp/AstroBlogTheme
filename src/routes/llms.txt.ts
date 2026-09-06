@@ -18,6 +18,7 @@ export async function GET(context: APIContext) {
     "",
     `- [Blog](${abs("/blog/")}): all posts`,
     `- [Tags](${abs("/tags/")}): posts by tag`,
+    `- [Series](${abs("/series/")}): multi-part posts`,
     `- [RSS feed](${abs("/rss.xml")})`,
     "",
     `## Posts`,

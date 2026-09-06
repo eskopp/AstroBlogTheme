@@ -343,6 +343,14 @@ export default function blogTheme(options = {}) {
           });
           injectRoute({ pattern: "/tags", entrypoint: at("tags-index.astro") });
           injectRoute({ pattern: "/tags/[tag]", entrypoint: at("tag.astro") });
+          injectRoute({
+            pattern: "/series",
+            entrypoint: at("series-index.astro"),
+          });
+          injectRoute({
+            pattern: "/series/[slug]",
+            entrypoint: at("series.astro"),
+          });
           injectRoute({ pattern: "/rss.xml", entrypoint: at("rss.xml.ts") });
           if (config.locales.length > 1) {
             injectRoute({

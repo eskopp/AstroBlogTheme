@@ -28,6 +28,38 @@ export const blogSchema = ({ image }: SchemaContext) =>
     heroAlt: z.string().default(""),
     tags: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
+    /**
+     * Series this post belongs to. A post can be part of several series, each
+     * with its own position. The series `name` is a stable, language-neutral
+     * key shared by every part (e.g. `"endgame-basics"`); give each locale its
+     * own display name with `title` (the first part that sets it wins).
+     * `order` places the post within that series (1, 2, 3, …); parts without a
+     * number sort last, by `pubDate`.
+     *
+     * ```yaml
+     * series:
+     *   - { name: endgame-basics, order: 2, title: "Endgame basics" }
+     *   - { name: reader-questions, order: 5 }
+     * ```
+     *
+     * A bare string (`series: endgame-basics`) or a list of strings is the
+     * shorthand for entries without an explicit order.
+     */
+    series: z
+      .union([
+        z.string(),
+        z.array(
+          z.union([
+            z.string(),
+            z.object({
+              name: z.string(),
+              order: z.number().optional(),
+              title: z.string().optional(),
+            }),
+          ]),
+        ),
+      ])
+      .optional(),
     /** Whether AI was used while writing this post. */
     ai: z.boolean().default(false),
     /** Show the table of contents for this post. Overrides the theme's `toc` option. */

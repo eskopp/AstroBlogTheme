@@ -1616,6 +1616,144 @@ th {
   border-top: 1px solid var(--border);
 }
 
+/* series */
+
+.series-nav {
+  margin: 1.5rem 0 2rem;
+  padding: 0.9rem 1.1rem;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--surface);
+  font-size: 0.9rem;
+}
+
+.series-nav + .series-nav {
+  margin-top: -1rem;
+}
+
+.series-nav__head {
+  margin: 0 0 0.6rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.series-nav__label {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.series-nav__title {
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.series-nav__title:hover {
+  text-decoration: underline;
+}
+
+.series-nav__count {
+  margin-left: auto;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.series-nav__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.series-nav__item {
+  display: flex;
+  gap: 0.55rem;
+  align-items: baseline;
+}
+
+.series-nav__item a {
+  text-decoration: none;
+}
+
+.series-nav__item a:hover {
+  text-decoration: underline;
+}
+
+.series-nav__no {
+  flex: none;
+  width: 1.4em;
+  text-align: right;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.series-nav__item.is-current .series-nav__no {
+  color: var(--accent);
+}
+
+.series-nav__this {
+  font-weight: 600;
+}
+
+.series-index {
+  list-style: none;
+  padding: 0;
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.series-index a {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  text-decoration: none;
+}
+
+.series-index a:hover {
+  text-decoration: underline;
+}
+
+.series-index__count {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.series-page__list {
+  counter-reset: series-part;
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.series-page__list > li {
+  counter-increment: series-part;
+  display: grid;
+  grid-template-columns: 2rem 1fr;
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.series-page__list > li::before {
+  content: counter(series-part);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
+}
+
 /* error pages */
 
 .errorpage {

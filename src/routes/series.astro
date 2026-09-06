@@ -1,0 +1,35 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PostCard from "../components/PostCard.astro";
+import { getSeriesList } from "../series";
+import { defaultLocale, t } from "../i18n";
+
+export async function getStaticPaths() {
+  const series = await getSeriesList(defaultLocale);
+  return series.map((s) => ({
+    params: { slug: s.slug },
+    props: { title: s.title, posts: s.posts },
+  }));
+}
+
+const { title, posts } = Astro.props;
+const locale = defaultLocale;
+---
+
+<BaseLayout
+  locale={locale}
+  title={title}
+  description={t("postsInSeries", locale, { series: title })}
+>
+  <p class="tag-page__back">
+    <a href="/series">← {t("allSeries", locale)}</a>
+  </p>
+  <h1>{title}</h1>
+  <ol class="series-page__list">
+    {posts.map((post) => (
+      <li>
+        <PostCard post={post} />
+      </li>
+    ))}
+  </ol>
+</BaseLayout>

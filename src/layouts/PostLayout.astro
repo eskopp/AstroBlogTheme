@@ -5,6 +5,7 @@ import FormattedDate from "../components/FormattedDate.astro";
 import config from "virtual:astro-blog-theme/config";
 import Toc from "../components/Toc.astro";
 import PostCard from "../components/PostCard.astro";
+import SeriesNav from "../components/SeriesNav.astro";
 import { tagSlug } from "../tags";
 import { getTranslations, getRelated, readingTimeMinutes } from "../posts";
 import { postLocale, postSlug, t } from "../i18n";
@@ -104,6 +105,8 @@ const showToc = (post.data.toc ?? config.toc) !== false;
         />
       )
     }
+
+    <SeriesNav post={post} locale={locale} />
 
     {showToc && <Toc headings={headings} locale={locale} variant="inline" />}
 

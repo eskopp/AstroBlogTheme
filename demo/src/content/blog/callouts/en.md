@@ -3,6 +3,8 @@ title: "Callouts"
 description: "The five coloured info boxes."
 pubDate: 2026-08-31
 tags: ["reference"]
+series:
+  - { name: content-features, order: 3 }
 ---
 
 Five GitHub-style callouts, each its own colour.

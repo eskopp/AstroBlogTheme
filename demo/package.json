@@ -14,8 +14,10 @@
     "mermaid": "^11.0.0"
   },
   "devDependencies": {
+    "chess.js": "^1.4.0",
     "katex": "^0.16.11",
     "rehype-katex": "^7.0.1",
-    "remark-math": "^6.0.0"
+    "remark-math": "^6.0.0",
+    "stockfish": "^18.0.8"
   }
 }

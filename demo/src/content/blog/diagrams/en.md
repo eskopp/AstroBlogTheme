@@ -3,6 +3,9 @@ title: "Diagrams with Mermaid"
 description: "A test post for Mermaid diagram rendering."
 pubDate: 2026-08-31
 tags: ["meta"]
+series:
+  - { name: content-features, order: 1, title: "Content features" }
+  - { name: getting-started, order: 3 }
 ---
 
 Mermaid diagrams render client-side, from a self-hosted bundle, only on pages

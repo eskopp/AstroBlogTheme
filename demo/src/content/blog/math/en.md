@@ -3,6 +3,8 @@ title: "Math and chemistry with KaTeX"
 description: "Test post for build-time math rendering."
 pubDate: 2026-08-31
 tags: ["meta"]
+series:
+  - { name: content-features, order: 2 }
 ---
 
 Rendered at build time — no client JavaScript.

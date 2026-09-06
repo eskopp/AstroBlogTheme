@@ -1,0 +1,46 @@
+---
+import type { Post } from "../posts";
+import { getSeriesContexts } from "../series";
+import { postSlug, t, type Locale } from "../i18n";
+
+interface Props {
+  post: Post;
+  locale: Locale;
+}
+
+const { post, locale } = Astro.props;
+const contexts = await getSeriesContexts(post);
+---
+
+{
+  contexts.map((s) => (
+    <aside class="series-nav" aria-label={t("series", locale)}>
+      <p class="series-nav__head">
+        <span class="series-nav__label">{t("series", locale)}</span>
+        <a class="series-nav__title" href={`/series/${s.slug}/`}>
+          {s.title}
+        </a>
+        <span class="series-nav__count">
+          {t("seriesPart", locale, { n: s.index, total: s.total })}
+        </span>
+      </p>
+      <ol class="series-nav__list">
+        {s.parts.map((part, i) => (
+          <li
+            class:list={[
+              "series-nav__item",
+              { "is-current": part.id === post.id },
+            ]}
+          >
+            <span class="series-nav__no">{i + 1}</span>
+            {part.id === post.id ? (
+              <span class="series-nav__this">{part.data.title}</span>
+            ) : (
+              <a href={`/blog/${postSlug(part)}/`}>{part.data.title}</a>
+            )}
+          </li>
+        ))}
+      </ol>
+    </aside>
+  ))
+}
