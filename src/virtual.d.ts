@@ -23,6 +23,7 @@ declare module "virtual:astro-blog-theme/config" {
     search: boolean;
     toc: boolean;
     mermaid: boolean;
+    mermaidPrerender: boolean;
     math: boolean;
     colorScheme: "system" | "light" | "dark";
     security: {

@@ -214,6 +214,40 @@ pre code {
   display: inline-block;
 }
 
+/* build-time prerendered mermaid: one SVG per colour scheme, CSS picks it */
+.prose .mermaid-prerendered {
+  margin: 1.75rem 0;
+  text-align: center;
+}
+
+.prose .mermaid-prerendered svg {
+  max-width: 100%;
+  height: auto;
+  display: inline-block;
+}
+
+.mermaid-prerendered__dark {
+  display: none;
+}
+
+:root[data-theme="dark"] .mermaid-prerendered__light {
+  display: none;
+}
+
+:root[data-theme="dark"] .mermaid-prerendered__dark {
+  display: block;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .mermaid-prerendered__light {
+    display: none;
+  }
+
+  :root:not([data-theme="light"]) .mermaid-prerendered__dark {
+    display: block;
+  }
+}
+
 /* chess boards */
 :root {
   --chess-light: #f0d9b5;

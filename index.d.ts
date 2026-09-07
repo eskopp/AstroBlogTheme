@@ -47,8 +47,17 @@ export interface BlogThemeOptions {
   search?: boolean;
   /** Show the table of contents on posts. Per-post `toc` frontmatter overrides. Default `true`. */
   toc?: boolean;
-  /** Render ```mermaid code blocks as diagrams client-side. Requires `mermaid` installed in the consumer. Default `false`. */
-  mermaid?: boolean;
+  /**
+   * Render ```mermaid code blocks as diagrams. `true` renders them client-side
+   * (needs `mermaid` in the consumer). `"prerender"` additionally renders each
+   * diagram to inline SVG at build time — one per colour scheme, no client JS
+   * on the happy path — by loading the built pages in a headless browser;
+   * needs `playwright-core` in the consumer and a Chrome/Chromium available
+   * (GitHub-hosted runners ship one; else set `MERMAID_PRERENDER_BROWSER`).
+   * Any diagram that fails to prerender falls back to client-side rendering.
+   * Default `false`.
+   */
+  mermaid?: boolean | "prerender";
   /** Render $...$ / $$...$$ math (and \ce{} chemistry) at build time with KaTeX. Requires remark-math, rehype-katex, katex in the consumer. Default `false`. */
   math?: boolean;
   /** Render ```fen code blocks (a FEN string) as a static inline SVG chessboard at build time. No client-side JS. The board orients to put the side to move at the bottom; add `white` or `black` after the language to pin it instead. Default `false`. */

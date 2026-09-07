@@ -1,4 +1,5 @@
 import { readFile, writeFile, readdir, stat } from "node:fs/promises";
+import { createServer } from "node:http";
 import { fileURLToPath } from "node:url";
 import sitemap from "@astrojs/sitemap";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
@@ -255,7 +256,8 @@ function resolveConfig(options) {
     errorLocale: options.errorLocale ?? DEFAULTS.errorLocale,
     ui: options.ui ?? {},
     toc: options.toc ?? DEFAULTS.toc,
-    mermaid: options.mermaid ?? DEFAULTS.mermaid,
+    mermaid: (options.mermaid ?? DEFAULTS.mermaid) ? true : false,
+    mermaidPrerender: options.mermaid === "prerender",
     math: options.math ?? DEFAULTS.math,
     chess: options.chess ?? DEFAULTS.chess,
     chessEngine: (options.chess ?? DEFAULTS.chess) && (options.chessEngine ?? DEFAULTS.chessEngine),
@@ -449,16 +451,29 @@ export default function blogTheme(options = {}) {
       "astro:config:done": ({ config: astroConfig }) => {
         pwaBuild.publicDir = astroConfig.publicDir;
         pwaBuild.base = astroConfig.base || "/";
+        pwaBuild.root = astroConfig.root;
       },
 
       "astro:build:done": async ({ dir, logger }) => {
-        if (!config.pwa) return;
-        try {
-          await emitPwaAssets({ dir, config, pwaBuild, logger });
-        } catch (err) {
-          logger.warn(
-            `pwa: could not generate the service worker / icons (${err.message}). Skipping.`,
-          );
+        // Mermaid first, so the PWA precache picks up the rendered HTML.
+        if (config.mermaidPrerender) {
+          try {
+            await prerenderMermaid({ dir, config, logger });
+          } catch (err) {
+            logger.warn(
+              `mermaid: prerender failed (${err.message}). Diagrams fall back to client-side rendering.`,
+            );
+          }
+        }
+
+        if (config.pwa) {
+          try {
+            await emitPwaAssets({ dir, config, pwaBuild, logger });
+          } catch (err) {
+            logger.warn(
+              `pwa: could not generate the service worker / icons (${err.message}). Skipping.`,
+            );
+          }
         }
       },
     },
@@ -551,4 +566,185 @@ async function emitPwaAssets({ dir, config, pwaBuild, logger }) {
     );
   await writeFile(new URL("sw.js", dir), sw);
   logger.info(`pwa: service worker + icons written (${precache.size} URLs precached)`);
+}
+
+const MIME = {
+  ".html": "text/html",
+  ".js": "text/javascript",
+  ".mjs": "text/javascript",
+  ".css": "text/css",
+  ".svg": "image/svg+xml",
+  ".json": "application/json",
+  ".woff2": "font/woff2",
+  ".woff": "font/woff",
+  ".ttf": "font/ttf",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".webp": "image/webp",
+  ".xml": "application/xml",
+};
+
+/** Collect every built HTML file that still has an un-rendered mermaid block. */
+async function findMermaidPages(absDir) {
+  const hits = [];
+  async function walk(d) {
+    for (const e of await readdir(d, { withFileTypes: true })) {
+      const p = `${d}/${e.name}`;
+      if (e.isDirectory()) await walk(p);
+      else if (e.name.endsWith(".html")) {
+        const html = await readFile(p, "utf8");
+        if (html.includes('<pre class="mermaid">')) hits.push({ path: p, html });
+      }
+    }
+  }
+  await walk(absDir);
+  return hits;
+}
+
+async function launchBrowser(chromium) {
+  const attempts = [];
+  for (const env of [
+    "MERMAID_PRERENDER_BROWSER",
+    "CHROME_PATH",
+    "PUPPETEER_EXECUTABLE_PATH",
+    "PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH",
+  ]) {
+    if (process.env[env]) attempts.push({ executablePath: process.env[env] });
+  }
+  attempts.push(
+    { channel: "chromium" },
+    { channel: "chrome" },
+    { channel: "msedge" },
+    {},
+  );
+  for (const opt of attempts) {
+    try {
+      return await chromium.launch({ headless: true, ...opt });
+    } catch {
+      /* try the next candidate */
+    }
+  }
+  return null;
+}
+
+/**
+ * Replace `<pre class="mermaid">` blocks in the built HTML with inline SVG,
+ * rendered by loading each page in a real browser and letting the theme's own
+ * client runtime draw the diagram — once per colour scheme. Pages that render
+ * cleanly also drop the now-unused MermaidRuntime script. Any failure leaves
+ * the page untouched (it still renders client-side).
+ */
+async function prerenderMermaid({ dir, config, logger }) {
+  const absDir = fileURLToPath(dir).replace(/\/$/, "");
+  const pages = await findMermaidPages(absDir);
+  if (pages.length === 0) return;
+
+  let chromium;
+  try {
+    ({ chromium } = await import("playwright-core"));
+  } catch {
+    logger.warn(
+      'mermaid: `mermaid: "prerender"` needs `playwright-core`. Run `npm i -D playwright-core`. Falling back to client-side rendering.',
+    );
+    return;
+  }
+
+  const browser = await launchBrowser(chromium);
+  if (!browser) {
+    logger.warn(
+      "mermaid: no Chromium/Chrome found for prerendering (set MERMAID_PRERENDER_BROWSER). Falling back to client-side rendering.",
+    );
+    return;
+  }
+
+  const server = createServer(async (req, res) => {
+    try {
+      let rel = decodeURIComponent((req.url || "/").split("?")[0]);
+      if (rel.endsWith("/")) rel += "index.html";
+      const file = `${absDir}${rel}`;
+      if (!file.startsWith(absDir)) {
+        res.statusCode = 403;
+        return res.end();
+      }
+      const body = await readFile(file);
+      const ext = rel.slice(rel.lastIndexOf("."));
+      res.setHeader("content-type", MIME[ext] || "application/octet-stream");
+      res.end(body);
+    } catch {
+      res.statusCode = 404;
+      res.end();
+    }
+  });
+  await new Promise((r) => server.listen(0, "127.0.0.1", r));
+  const port = server.address().port;
+  const origin = `http://127.0.0.1:${port}`;
+
+  const blockRe = /<pre class="mermaid">[\s\S]*?<\/pre>/g;
+  const runtimeRe =
+    /\s*<script[^>]*src="[^"]*MermaidRuntime[^"]*"[^>]*><\/script>/g;
+
+  let rendered = 0;
+  try {
+    for (const { path: filePath, html } of pages) {
+      const rel = filePath.slice(absDir.length).replace(/index\.html$/, "");
+      const url = origin + rel;
+      const count = (html.match(blockRe) || []).length;
+
+      const grab = async (scheme) => {
+        const page = await browser.newPage();
+        await page.addInitScript((s) => {
+          try {
+            localStorage.setItem("theme", s);
+          } catch {}
+        }, scheme);
+        await page.emulateMedia({ colorScheme: scheme });
+        await page.goto(url, { waitUntil: "load", timeout: 20000 });
+        await page.waitForFunction(
+          (n) =>
+            document.querySelectorAll(".mermaid[data-processed]").length >= n,
+          count,
+          { timeout: 20000 },
+        );
+        const svgs = await page.$$eval(".mermaid", (els) =>
+          els.map((el) => el.innerHTML),
+        );
+        await page.close();
+        return svgs;
+      };
+
+      let light, dark;
+      try {
+        light = await grab("light");
+        dark = await grab("dark");
+      } catch (err) {
+        logger.warn(
+          `mermaid: ${rel || "/"} did not render in time, left for the client (${err.message}).`,
+        );
+        continue;
+      }
+      if (light.length !== count || dark.length !== count) continue;
+
+      let i = 0;
+      const out = html.replace(blockRe, () => {
+        const l = light[i];
+        const d = dark[i];
+        i += 1;
+        return (
+          `<div class="mermaid-prerendered">` +
+          `<div class="mermaid-prerendered__light">${l}</div>` +
+          `<div class="mermaid-prerendered__dark">${d}</div>` +
+          `</div>`
+        );
+      });
+      await writeFile(filePath, out.replace(runtimeRe, ""));
+      rendered += count;
+    }
+  } finally {
+    await browser.close();
+    server.close();
+  }
+
+  logger.info(
+    `mermaid: prerendered ${rendered} diagram${rendered === 1 ? "" : "s"} to inline SVG`,
+  );
 }
