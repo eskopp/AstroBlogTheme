@@ -1,29 +1,53 @@
 ---
+import type { GetStaticPaths, Page } from "astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PostCard from "../components/PostCard.astro";
-import { getPosts } from "../posts";
+import { getPosts, type Post } from "../posts";
+import config from "virtual:astro-blog-theme/config";
 import { defaultLocale, t } from "../i18n";
 
-const locale = defaultLocale;
-const posts = await getPosts(locale);
+export const getStaticPaths = (async ({ paginate }) => {
+  const posts = await getPosts(defaultLocale);
+  return paginate(posts, { pageSize: Math.max(1, config.postsPerPage) });
+}) satisfies GetStaticPaths;
 
-const groups = new Map<number, typeof posts>();
-for (const post of posts) {
+const locale = defaultLocale;
+const { page } = Astro.props as { page: Page<Post> };
+
+// Group consecutive posts of the same year under one heading.
+const sections: { year: number; posts: Post[] }[] = [];
+for (const post of page.data) {
   const year = post.data.pubDate.getFullYear();
-  if (!groups.has(year)) groups.set(year, []);
-  groups.get(year)!.push(post);
+  const last = sections.at(-1);
+  if (last && last.year === year) last.posts.push(post);
+  else sections.push({ year, posts: [post] });
 }
-const years = [...groups.keys()].sort((a, b) => b - a);
+
+const title =
+  page.currentPage === 1
+    ? t("blog", locale)
+    : `${t("blog", locale)} — ${t("pageOf", locale, {
+        n: page.currentPage,
+        total: page.lastPage,
+      })}`;
 ---
 
-<BaseLayout locale={locale} title={t("blog", locale)} needsMermaid={false} needsChess={false}>
+<BaseLayout
+  locale={locale}
+  title={title}
+  needsMermaid={false}
+  needsChess={false}
+>
   <h1>{t("blog", locale)}</h1>
+
+  {page.data.length === 0 && <p>{t("noPosts", locale)}</p>}
+
   {
-    years.map((year) => (
-      <section style="margin-top: 2.5rem;">
-        <h2 class="section-title">{year}</h2>
+    sections.map((section) => (
+      <section class="blog-year">
+        <h2 class="section-title">{section.year}</h2>
         <ul class="post-list">
-          {groups.get(year)!.map((post) => (
+          {section.posts.map((post) => (
             <li>
               <PostCard post={post} />
             </li>
@@ -32,5 +56,32 @@ const years = [...groups.keys()].sort((a, b) => b - a);
       </section>
     ))
   }
-  {posts.length === 0 && <p>{t("noPosts", locale)}</p>}
+
+  {
+    page.lastPage > 1 && (
+      <nav class="pagination" aria-label={t("postNav", locale)}>
+        {page.url.prev ? (
+          <a class="pagination__link" href={page.url.prev} rel="prev">
+            ← {t("newerPosts", locale)}
+          </a>
+        ) : (
+          <span class="pagination__link is-disabled">
+            ← {t("newerPosts", locale)}
+          </span>
+        )}
+        <span class="pagination__status">
+          {t("pageOf", locale, { n: page.currentPage, total: page.lastPage })}
+        </span>
+        {page.url.next ? (
+          <a class="pagination__link" href={page.url.next} rel="next">
+            {t("olderPosts", locale)} →
+          </a>
+        ) : (
+          <span class="pagination__link is-disabled">
+            {t("olderPosts", locale)} →
+          </span>
+        )}
+      </nav>
+    )
+  }
 </BaseLayout>

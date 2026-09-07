@@ -21,6 +21,7 @@ export default defineConfig({
       ],
       mermaid: true,
       math: true,
+      postsPerPage: 2,
       security: {
         contact: "https://example.com/security",
         preferredLanguages: ["en", "de"],

@@ -354,7 +354,10 @@ export default function blogTheme(options = {}) {
 
         if (injectRoutes) {
           const at = (name) => `astro-blog-theme/routes/${name}`;
-          injectRoute({ pattern: "/blog", entrypoint: at("blog-index.astro") });
+          injectRoute({
+            pattern: "/blog/[...page]",
+            entrypoint: at("blog-index.astro"),
+          });
           injectRoute({
             pattern: "/blog/[...slug]",
             entrypoint: at("blog-post.astro"),

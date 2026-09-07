@@ -39,7 +39,7 @@ export interface BlogThemeOptions {
   legal?: NavLink[];
   /** Content licence shown in the footer next to the copyright, e.g. `{ label: "CC BY-ND 4.0", href: "https://creativecommons.org/licenses/by-nd/4.0/deed.de" }`. */
   license?: { label: string; href: string } | null;
-  /** Number of posts on the home page. Default `5`. */
+  /** Posts on the home page, and the page size of the paginated `/blog` index (`/blog`, `/blog/2`, …). Default `5`. */
   postsPerPage?: number;
   /** How post lists (home, /blog, /tags) render: "cards" (default) or "rows" (minimal date + title lines). */
   postList?: "cards" | "rows";

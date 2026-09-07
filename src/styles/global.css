@@ -1616,6 +1616,46 @@ th {
   border-top: 1px solid var(--border);
 }
 
+/* blog index + pagination */
+
+.blog-year {
+  margin-top: 1.75rem;
+}
+
+.blog-year + .blog-year {
+  margin-top: 2.5rem;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.95rem;
+}
+
+.pagination__link {
+  text-decoration: none;
+}
+
+.pagination__link:hover:not(.is-disabled) {
+  text-decoration: underline;
+}
+
+.pagination__link.is-disabled {
+  color: var(--text-muted);
+  opacity: 0.5;
+}
+
+.pagination__status {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
 /* series */
 
 .series-nav {
