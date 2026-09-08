@@ -31,7 +31,7 @@ jobs:
         run: |
           set -euo pipefail
           cd source.git
-          GITLAB_REPO_URL="https://oauth2:${GITLAB_TOKEN}@gitlab.erik-skopp.de/Themes/AstroBlogTheme.git"
+          GITLAB_REPO_URL="https://oauth2:${GITLAB_TOKEN}@gitlab.erikskopp.de/Themes/AstroBlogTheme.git"
 
           git lfs fetch --all origin || true
           git lfs push --all "$GITLAB_REPO_URL" || true
@@ -72,7 +72,7 @@ jobs:
 
             exists=$(curl -s -o /dev/null -w "%{http_code}" \
               -H "PRIVATE-TOKEN: $GITLAB_TOKEN" \
-              "https://gitlab.erik-skopp.de/api/v4/projects/$GITLAB_PROJECT/releases/$tag")
+              "https://gitlab.erikskopp.de/api/v4/projects/$GITLAB_PROJECT/releases/$tag")
 
             payload=$(jq -n --arg tag "$tag" --arg name "$name" --arg desc "$body" \
               '{tag_name: $tag, name: $name, description: $desc}')
@@ -80,11 +80,11 @@ jobs:
             if [ "$exists" = "200" ]; then
               curl -s -X PUT -H "PRIVATE-TOKEN: $GITLAB_TOKEN" -H "Content-Type: application/json" \
                 -d "$payload" \
-                "https://gitlab.erik-skopp.de/api/v4/projects/$GITLAB_PROJECT/releases/$tag" > /dev/null
+                "https://gitlab.erikskopp.de/api/v4/projects/$GITLAB_PROJECT/releases/$tag" > /dev/null
             else
               curl -s -X POST -H "PRIVATE-TOKEN: $GITLAB_TOKEN" -H "Content-Type: application/json" \
                 -d "$payload" \
-                "https://gitlab.erik-skopp.de/api/v4/projects/$GITLAB_PROJECT/releases" > /dev/null
+                "https://gitlab.erikskopp.de/api/v4/projects/$GITLAB_PROJECT/releases" > /dev/null
             fi
 
             echo "$release" | jq -c '.assets[]?' | while read -r asset; do
@@ -94,6 +94,6 @@ jobs:
                 '{name: $name, url: $url}')
               curl -s -X POST -H "PRIVATE-TOKEN: $GITLAB_TOKEN" -H "Content-Type: application/json" \
                 -d "$link_payload" \
-                "https://gitlab.erik-skopp.de/api/v4/projects/$GITLAB_PROJECT/releases/$tag/assets/links" > /dev/null || true
+                "https://gitlab.erikskopp.de/api/v4/projects/$GITLAB_PROJECT/releases/$tag/assets/links" > /dev/null || true
             done
           done
