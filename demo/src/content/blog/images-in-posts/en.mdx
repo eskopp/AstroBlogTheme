@@ -1,0 +1,33 @@
+---
+title: "Images in posts"
+description: "The three ways to put a picture inside a post body."
+pubDate: 2026-09-09
+tags: ["reference"]
+---
+
+import { Image } from "astro:assets";
+import Figure from "astro-blog-theme/components/Figure.astro";
+import sample from "./sample.jpg";
+
+## 1. Plain Markdown
+
+A relative path is optimised at build time and gets the prose border/radius:
+
+![A soft gradient](./sample.jpg)
+
+## 2. `<Figure>` with a caption
+
+`.mdx` posts can use components. `<Figure>` wraps an optimised image and an
+optional caption:
+
+<Figure src={sample} alt="A soft gradient" caption="Figure 1: an imported image, rendered through <Figure>." />
+
+Pass `wide` to let it spill past the reading column:
+
+<Figure src={sample} alt="A soft gradient" caption="The same image, wide." wide />
+
+## 3. Raw `<Image>`
+
+For full control, use `astro:assets` directly:
+
+<Image src={sample} alt="A soft gradient" width={600} />

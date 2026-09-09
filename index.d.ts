@@ -106,6 +106,8 @@ export interface BlogThemeOptions {
   injectRoutes?: boolean;
   /** Add `@astrojs/sitemap` unless already present. Default `true`. */
   sitemap?: boolean;
+  /** Register `@astrojs/mdx` unless already present, so posts can be `.mdx`. Default `true`. */
+  mdx?: boolean;
 }
 
 export default function blogTheme(options?: BlogThemeOptions): AstroIntegration;

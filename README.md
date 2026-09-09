@@ -110,6 +110,38 @@ Add posts to `src/content/blog/*.md`. Put `favicon.svg` (and optionally
 | `search`       | `boolean`                       | `true`                             |
 | `injectRoutes` | `boolean`                       | `true`                             |
 | `sitemap`      | `boolean`                       | `true`                             |
+| `mdx`          | `boolean`                       | `true`                             |
+
+## Images in posts
+
+Three ways to put a picture inside a post body:
+
+1. **Plain Markdown**, relative path — optimised at build time, gets the prose
+   border and radius:
+
+   ```md
+   ![Short description](./diagram.png)
+   ```
+
+2. **`<Figure>`** (in `.mdx` posts) — an optimised image with an optional
+   caption; add `wide` to let it spill past the reading column:
+
+   ```mdx
+   import Figure from "astro-blog-theme/components/Figure.astro";
+   import shot from "./shot.png";
+
+   <Figure src={shot} alt="…" caption="What the reader is looking at." />
+   ```
+
+3. **Raw `<Image>`** from `astro:assets` for full control.
+
+A `public/` file referenced as `/foo.png` is served as-is, without optimisation.
+
+### MDX
+
+Posts saved as `.mdx` may use components and still inherit every remark/rehype
+plugin (callouts, Mermaid, chess, math, heading anchors). Plain `.md` posts are
+unaffected. Set `mdx: false` to skip registering `@astrojs/mdx`.
 
 ## Multi-language
 

@@ -1608,6 +1608,32 @@ th {
   border: 1px solid var(--border);
 }
 
+/* figures: a standalone Markdown image, or the theme's <Figure> component */
+.prose figure {
+  margin: 2rem 0;
+}
+
+.prose figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.prose figcaption {
+  margin-top: 0.6rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* opt-in: let a figure spill past the reading column up to the wide width */
+.prose-figure--wide {
+  width: min(var(--wide-width), 92vw);
+  margin-left: 50%;
+  transform: translateX(-50%);
+}
+
 /* wide markdown content scrolls inside itself instead of the page */
 .prose table {
   display: block;

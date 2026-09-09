@@ -2,6 +2,7 @@ import { readFile, writeFile, readdir, stat } from "node:fs/promises";
 import { createServer } from "node:http";
 import { fileURLToPath } from "node:url";
 import sitemap from "@astrojs/sitemap";
+import mdx from "@astrojs/mdx";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import { visit } from "unist-util-visit";
 import { renderChessBoard } from "./src/chess.mjs";
@@ -294,6 +295,7 @@ export default function blogTheme(options = {}) {
   const config = resolveConfig(options);
   const injectRoutes = options.injectRoutes !== false;
   const withSitemap = options.sitemap !== false;
+  const mdxEnabled = options.mdx !== false;
   return {
     name: "astro-blog-theme",
     hooks: {
@@ -352,6 +354,16 @@ export default function blogTheme(options = {}) {
           !astroConfig.integrations.some((i) => i.name === "@astrojs/sitemap")
         ) {
           updateConfig({ integrations: [sitemap()] });
+        }
+
+        // MDX: lets posts saved as `.mdx` use components (e.g. <Figure>) while
+        // still inheriting every remark/rehype plugin configured above. Plain
+        // `.md` posts are unaffected.
+        if (
+          mdxEnabled &&
+          !astroConfig.integrations.some((i) => i.name === "@astrojs/mdx")
+        ) {
+          updateConfig({ integrations: [mdx()] });
         }
 
         if (injectRoutes) {

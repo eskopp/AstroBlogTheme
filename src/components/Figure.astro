@@ -1,0 +1,42 @@
+---
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+
+interface Props {
+  /** An imported image (`import pic from "./pic.jpg"`) for build-time
+   *  optimisation, or a string path for something in `public/`. */
+  src: ImageMetadata | string;
+  alt: string;
+  /** Optional caption rendered below the image. Plain text. */
+  caption?: string;
+  /** Passed through to <Image> for imported sources. */
+  widths?: number[];
+  sizes?: string;
+  loading?: "lazy" | "eager";
+  /** Widen the figure past the prose column ("bleed") or keep it inline. */
+  wide?: boolean;
+}
+
+const {
+  src,
+  alt,
+  caption,
+  widths = [480, 768, 1200, 1600],
+  sizes = "(min-width: 45rem) 42rem, 100vw",
+  loading = "lazy",
+  wide = false,
+} = Astro.props;
+
+const isImported = typeof src !== "string";
+---
+
+<figure class:list={["prose-figure", { "prose-figure--wide": wide }]}>
+  {
+    isImported ? (
+      <Image src={src} alt={alt} widths={widths} sizes={sizes} loading={loading} />
+    ) : (
+      <img src={src} alt={alt} loading={loading} />
+    )
+  }
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
