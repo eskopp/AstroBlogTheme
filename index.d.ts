@@ -111,6 +111,9 @@ export interface BlogThemeOptions {
   /** Warn at build time about Markdown images (`![](…)`) that carry no credit /
    *  AI status, nudging authors to the `<Figure>` component. Default `true`. */
   imageCredits?: boolean;
+  /** Show the theme version in the footer (linked to its GitHub release when
+   *  the repository is known). Set `false` to hide it. Default `true`. */
+  themeVersion?: false;
 }
 
 export default function blogTheme(options?: BlogThemeOptions): AstroIntegration;

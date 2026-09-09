@@ -111,6 +111,8 @@ Add posts to `src/content/blog/*.md`. Put `favicon.svg` (and optionally
 | `injectRoutes` | `boolean`                       | `true`                             |
 | `sitemap`      | `boolean`                       | `true`                             |
 | `mdx`          | `boolean`                       | `true`                             |
+| `imageCredits` | `boolean`                       | `true`                             |
+| `themeVersion` | `false`                         | shown                              |
 
 ## Images in posts
 

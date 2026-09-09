@@ -3,6 +3,11 @@ import config from "virtual:astro-blog-theme/config";
 const year = new Date().getFullYear();
 const legal = config.legal ?? [];
 const license = config.license;
+const themeVersion = config.themeVersion;
+const themeHref =
+  themeVersion && config.themeRepo
+    ? `${config.themeRepo}/releases/tag/v${themeVersion}`
+    : null;
 ---
 
 <footer class="site-footer">
@@ -40,6 +45,17 @@ const license = config.license;
             </>
           ))}
         </nav>
+      </div>
+    )
+  }
+  {
+    themeVersion && (
+      <div class="site-footer__inner site-footer__version">
+        {themeHref ? (
+          <a href={themeHref}>AstroBlogTheme v{themeVersion}</a>
+        ) : (
+          <span>AstroBlogTheme v{themeVersion}</span>
+        )}
       </div>
     )
   }

@@ -1,11 +1,21 @@
 import { readFile, writeFile, readdir, stat } from "node:fs/promises";
 import { createServer } from "node:http";
 import { fileURLToPath } from "node:url";
+import { createRequire } from "node:module";
 import sitemap from "@astrojs/sitemap";
 import mdx from "@astrojs/mdx";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import { visit } from "unist-util-visit";
 import { renderChessBoard } from "./src/chess.mjs";
+
+const pkg = createRequire(import.meta.url)("./package.json");
+const THEME_VERSION = pkg.version;
+/** `https://github.com/owner/repo` from package.json `repository`, or null. */
+const THEME_REPO = (() => {
+  const url = typeof pkg.repository === "string" ? pkg.repository : pkg.repository?.url;
+  const m = url && url.match(/github\.com[/:]([^/]+\/[^/.]+)/);
+  return m ? `https://github.com/${m[1]}` : null;
+})();
 
 const CALLOUT_LABELS = {
   de: {
@@ -281,6 +291,8 @@ function resolveConfig(options) {
     postList: options.postList === "rows" ? "rows" : DEFAULTS.postList,
     security: options.security ?? DEFAULTS.security,
     pwa: normalizePwa(options.pwa, options),
+    themeVersion: options.themeVersion === false ? null : THEME_VERSION,
+    themeRepo: THEME_REPO,
   };
   merged.defaultLocale = merged.locales[0];
   return merged;
