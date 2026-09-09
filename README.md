@@ -123,19 +123,36 @@ Three ways to put a picture inside a post body:
    ![Short description](./diagram.png)
    ```
 
-2. **`<Figure>`** (in `.mdx` posts) — an optimised image with an optional
-   caption; add `wide` to let it spill past the reading column:
+2. **`<Figure>`** (in `.mdx` posts) — an optimised image with a caption, a
+   credit and an AI flag. `credit` and `ai` are required (the build warns if
+   they are missing); `caption` is optional. `ai={true}` shows an "AI" badge,
+   `ai={false}` shows nothing. Add `wide` to spill past the reading column.
 
    ```mdx
    import Figure from "astro-blog-theme/components/Figure.astro";
    import shot from "./shot.png";
 
-   <Figure src={shot} alt="…" caption="What the reader is looking at." />
+   <Figure
+     src={shot}
+     alt="…"
+     caption="What the reader is looking at."
+     credit="© 2026 Your Name"
+     creditHref="https://example.com"
+     ai={false}
+   />
    ```
 
 3. **Raw `<Image>`** from `astro:assets` for full control.
 
 A `public/` file referenced as `/foo.png` is served as-is, without optimisation.
+Plain Markdown images (`![](…)`) trigger a build warning because they cannot
+carry a credit or AI status — set `imageCredits: false` to silence it.
+
+### Hero image credit
+
+`heroImage` takes the same metadata via frontmatter: `heroCaption`,
+`heroCredit`, `heroCreditHref` and `heroAi`. The build warns if `heroImage` is
+set without `heroCredit` / `heroAi`.
 
 ### MDX
 

@@ -108,6 +108,9 @@ export interface BlogThemeOptions {
   sitemap?: boolean;
   /** Register `@astrojs/mdx` unless already present, so posts can be `.mdx`. Default `true`. */
   mdx?: boolean;
+  /** Warn at build time about Markdown images (`![](…)`) that carry no credit /
+   *  AI status, nudging authors to the `<Figure>` component. Default `true`. */
+  imageCredits?: boolean;
 }
 
 export default function blogTheme(options?: BlogThemeOptions): AstroIntegration;

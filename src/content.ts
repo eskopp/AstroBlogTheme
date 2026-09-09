@@ -26,6 +26,16 @@ export const blogSchema = ({ image }: SchemaContext) =>
     updatedDate: z.coerce.date().optional(),
     heroImage: image().optional(),
     heroAlt: z.string().default(""),
+    /** Caption shown under the hero image. */
+    heroCaption: z.string().optional(),
+    /** Rights holder / source of the hero image, e.g. "© 2026 Erik Skopp".
+     *  The build warns if `heroImage` is set without it. */
+    heroCredit: z.string().optional(),
+    /** Optional link for the hero credit. */
+    heroCreditHref: z.string().optional(),
+    /** Whether the hero image was generated with AI. Set it explicitly when
+     *  `heroImage` is used; the build warns if it is missing. */
+    heroAi: z.boolean().optional(),
     tags: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
     /**

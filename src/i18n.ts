@@ -87,6 +87,7 @@ const STRINGS: Record<string, Record<string, string>> = {
     tooManyRequestsBody: "Du hast in kurzer Zeit zu viele Anfragen gestellt. Bitte warte einen Moment.",
     postsTagged: "Beiträge mit dem Tag „{tag}“.",
     aiFlag: "Für diesen Beitrag wurde KI verwendet",
+    imageAi: "Dieses Bild wurde mit KI erstellt",
   },
   en: {
     skipToContent: "Skip to content",
@@ -131,6 +132,7 @@ const STRINGS: Record<string, Record<string, string>> = {
     tooManyRequestsBody: "You have sent too many requests in a short time. Please wait a moment.",
     postsTagged: "Posts tagged “{tag}”.",
     aiFlag: "AI was used while writing this post",
+    imageAi: "This image was generated with AI",
   },
 };
 

@@ -1,6 +1,6 @@
 ---
 title: "Images in posts"
-description: "The three ways to put a picture inside a post body."
+description: "The ways to put a picture inside a post body, with caption, credit and AI status."
 pubDate: 2026-09-09
 tags: ["reference"]
 ---
@@ -9,25 +9,41 @@ import { Image } from "astro:assets";
 import Figure from "astro-blog-theme/components/Figure.astro";
 import sample from "./sample.jpg";
 
-## 1. Plain Markdown
+## Plain Markdown
 
-A relative path is optimised at build time and gets the prose border/radius:
+A relative path is optimised at build time and gets the prose border/radius. It
+carries no caption or credit, so the build warns and nudges you to `<Figure>`:
 
 ![A soft gradient](./sample.jpg)
 
-## 2. `<Figure>` with a caption
+## `<Figure>` — caption, credit, AI status
 
-`.mdx` posts can use components. `<Figure>` wraps an optimised image and an
-optional caption:
+`.mdx` posts can use components. Every `<Figure>` takes a `credit` (rights
+holder / source) and an `ai` flag; `caption` is optional. `ai={true}` shows an
+"AI" badge, `ai={false}` shows nothing extra.
 
-<Figure src={sample} alt="A soft gradient" caption="Figure 1: an imported image, rendered through <Figure>." />
+<Figure
+  src={sample}
+  alt="A soft gradient"
+  caption="Figure 1: an imported image rendered through <Figure>."
+  credit="© 2026 Erik Skopp"
+  ai={false}
+/>
 
-Pass `wide` to let it spill past the reading column:
+An AI-generated image, with a linked credit and `wide` bleed:
 
-<Figure src={sample} alt="A soft gradient" caption="The same image, wide." wide />
+<Figure
+  src={sample}
+  alt="A soft gradient"
+  caption="The same image, marked as AI-generated."
+  credit="Generated with a diffusion model"
+  creditHref="https://example.com"
+  ai={true}
+  wide
+/>
 
-## 3. Raw `<Image>`
+## Raw `<Image>`
 
-For full control, use `astro:assets` directly:
+For full control, use `astro:assets` directly (no caption/credit affordance):
 
 <Image src={sample} alt="A soft gradient" width={600} />

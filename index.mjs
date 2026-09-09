@@ -72,6 +72,21 @@ function remarkCallouts(config) {
   };
 }
 
+/**
+ * Warn about Markdown images (`![](…)`): they cannot carry a caption, credit or
+ * AI flag, so authors should use the <Figure> component (in `.mdx`) instead.
+ */
+function remarkWarnBareImages() {
+  return (tree, file) => {
+    visit(tree, "image", (node) => {
+      const where = file.path ? ` in ${file.path}` : "";
+      console.warn(
+        `[astro-blog-theme] Markdown image${where} ("${node.alt || node.url}") has no credit/AI status — use <Figure> instead.`,
+      );
+    });
+  };
+}
+
 /** Turn ```mermaid fenced blocks into <pre class="mermaid"> for client rendering. */
 function remarkMermaidPassthrough() {
   return (tree) => {
@@ -296,6 +311,7 @@ export default function blogTheme(options = {}) {
   const injectRoutes = options.injectRoutes !== false;
   const withSitemap = options.sitemap !== false;
   const mdxEnabled = options.mdx !== false;
+  const imageCredits = options.imageCredits !== false;
   return {
     name: "astro-blog-theme",
     hooks: {
@@ -306,6 +322,7 @@ export default function blogTheme(options = {}) {
         logger,
       }) => {
         const remarkPlugins = [[remarkCallouts, config]];
+        if (imageCredits) remarkPlugins.push(remarkWarnBareImages);
         const mathRehype = [];
         if (config.mermaid) remarkPlugins.push(remarkMermaidPassthrough);
         if (config.chess) remarkPlugins.push([remarkChessPassthrough, config]);

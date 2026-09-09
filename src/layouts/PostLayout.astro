@@ -34,8 +34,31 @@ const {
   needsChess,
 } = Astro.props;
 const readMin = readingTimeMinutes(post);
-const { title, description, pubDate, updatedDate, heroImage, heroAlt, tags, ai } =
-  post.data;
+const {
+  title,
+  description,
+  pubDate,
+  updatedDate,
+  heroImage,
+  heroAlt,
+  heroCaption,
+  heroCredit,
+  heroCreditHref,
+  heroAi,
+  tags,
+  ai,
+} = post.data;
+
+if (import.meta.env.PROD && heroImage) {
+  if (!heroCredit)
+    console.warn(
+      `[astro-blog-theme] post "${post.id}" sets heroImage without heroCredit`,
+    );
+  if (typeof heroAi !== "boolean")
+    console.warn(
+      `[astro-blog-theme] post "${post.id}" sets heroImage without heroAi (true/false)`,
+    );
+}
 
 const locale = postLocale(post.id);
 const translations = await getTranslations(post);
@@ -107,13 +130,35 @@ const showToc = (post.data.toc ?? config.toc) !== false;
 
     {
       heroImage && (
-        <img
-          class="post__hero"
-          src={heroImage.src}
-          width={heroImage.width}
-          height={heroImage.height}
-          alt={heroAlt}
-        />
+        <figure class="post__hero">
+          <img
+            src={heroImage.src}
+            width={heroImage.width}
+            height={heroImage.height}
+            alt={heroAlt}
+          />
+          {(heroCaption || heroCredit || heroAi) && (
+            <figcaption>
+              {heroCaption && <span class="figure__caption">{heroCaption}</span>}
+              <span class="figure__meta">
+                {heroCredit &&
+                  (heroCreditHref ? (
+                    <a href={heroCreditHref}>{heroCredit}</a>
+                  ) : (
+                    <span>{heroCredit}</span>
+                  ))}
+                {heroAi && (
+                  <span class="ai-flag ai-flag--fig" title={t("imageAi", locale)}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" />
+                    </svg>
+                    AI
+                  </span>
+                )}
+              </span>
+            </figcaption>
+          )}
+        </figure>
       )
     }
 

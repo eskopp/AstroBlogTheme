@@ -1342,9 +1342,54 @@ th {
 }
 
 .post__hero {
+  margin: 0 0 2rem;
+}
+
+.post__hero img {
+  display: block;
+  width: 100%;
+  height: auto;
   border-radius: var(--radius);
   border: 1px solid var(--border);
-  margin-bottom: 2rem;
+}
+
+/* caption + credit line shared by <Figure> and the post hero */
+.prose figcaption,
+.post__hero figcaption {
+  margin-top: 0.6rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.figure__caption {
+  display: block;
+}
+
+.figure__meta {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.15rem;
+  font-size: 0.82rem;
+}
+
+.figure__meta a {
+  color: inherit;
+}
+
+.ai-flag--fig {
+  margin-left: 0;
+  font-size: 0.68rem;
+  padding: 0.02rem 0.4rem;
+}
+
+.ai-flag--fig svg {
+  width: 0.68rem;
+  height: 0.68rem;
 }
 
 .tag-list {
@@ -1617,14 +1662,6 @@ th {
   display: block;
   width: 100%;
   height: auto;
-}
-
-.prose figcaption {
-  margin-top: 0.6rem;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  color: var(--text-muted);
-  text-align: center;
 }
 
 /* opt-in: let a figure spill past the reading column up to the wide width */
